@@ -10,12 +10,14 @@
 \usepackage[colorlinks=true]{hyperref}
 \usepackage[linesnumbered,algoruled,boxed,lined]{algorithm2e}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{caption}
 \usepackage{float}
 \usepackage{multirow}
 \usepackage{placeins}
 \usepackage{hhline}
 \usepackage{MnSymbol}
+\usepackage[scientific-notation=true]{siunitx}
 
 \def\d{\,{\rm d}}               % differential
 \def\vc#1{\mathbf{\boldsymbol{#1}}}     % vector
@@ -201,7 +203,7 @@ where
 \[ 
    c = \left(\sum_{l=1}^{L} q^l\right)^2 \le (1-q)^{-2},\ q=2^\frac{\gamma - \beta}{2}
 \]
-for given target varaince $V=\epsilon^2$. Similarly, $V \le S^2 / C$ for given target cost $C$.
+for given target variance $V=\epsilon^2$. Similarly, $V \le S^2 / C$ for given target cost $C$.
 
 
 
@@ -263,7 +265,7 @@ we reject hypothesis of the good fit.
 \todo{Move variance approximation to notes since we need more testing}
 Remarks:
 \begin{itemize}
- \item Empirically, for the Flow problem, 9 level, for kvadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw varainces.
+ \item Empirically, for the Flow problem, 9 level, for quadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw variances.
  \item The hypothesis testing doesn't work. Even if it holds that $W_l$ is approximately $N(0,1)$.
  We obtain much higher values for the statistics. Further it depends on number of moments and number of used levels. 
  \item It behaves like it have much greater variance then 1, since $W_l^2$ values corresponds always to the p-values close to 1, which corresponds to big error of the fit.
@@ -347,7 +349,7 @@ Notes:
 The MLMC  estimator \eqref{eq:mlmc_est} can be applied to estimate any generalized moment $\E[\phi(X)]$ 
 of the random variable $X$ using the same set of random samples. Taking a suitable 
 set of such moments it is possible to construct an approximation to the PDF of $X$. This section first
-summarize the Maximal Entropy method and related theoretical results slightly simplifying proofs form \cite{Barron1991}. Later we provide natural selection of the polynomial basis based on the estimate of the covariance matrix and we show that this choice significantly improves convergency of the related optimization problem.
+summarize the Maximal Entropy method and related theoretical results slightly simplifying proofs form \cite{Barron1991}. Later we provide natural selection of the polynomial basis based on the estimate of the covariance matrix and we show that this choice significantly improves convergence of the related optimization problem.
 
 Let $X$ be a continuous random variable with density function $\rho$ that have bounded support
 $supp(\rho) \subset \Omega$ for a finite interval $\Omega \subset \R$. Further consider generalized moments
@@ -384,10 +386,10 @@ Similarly, we can obtain MLMC estimate of the covariance matrix $\tn C = \Cov{\v
 The same set of samples can be used in estimators \eqref{eq:mlmc_est}, \eqref{eq:mlmc_est_moments}, and \eqref{eq:mlmc_est_cov} as well as in the estimators of their errors.
 
 
-Our next goal is to to find an approximation $\rho^M$ to the unknown density $\rho$ based only on values $\vmu \in \mathcal M$ of the generalized moments. From the infinte set of such densities we choose the one that maximize the Shanon's entropy,
+Our next goal is to find an approximation $\rho^M$ to the unknown density $\rho$ based only on values $\vmu \in \mathcal M$ of the generalized moments. From the infinite set of such densities we choose the one that maximize the Shannon's entropy,
 $S = -\E_\rho[\log \rho]$,
 which corresponds to the minimization of any additional information. 
-In slight generalization of this approach, we assume a prior density $p$ and going to minimize the Kullbeck-Leibler divergence:
+In slight generalization of this approach, we assume a prior density $p$ and going to minimize the Kullback-Leibler divergence:
 \[
     D(\rho\Vert p) = \int_\Omega \rho \log(\rho / p) \d x,
 \]
@@ -428,8 +430,7 @@ The system \eqref{eq:moment_system} represents optimality conditions to the mini
     \text{minimize}(\vc\lambda):\quad F(\vl) = \int_{\Omega} \rho_{\vl} - \vl\cdot\vmu.
 \end{equation}
 The functional is strictly convex due to strict convexity of $e^t$ (note also that $\tn H$ is SPD Hessian of $F$). 
-Therefore the problem \eqref{eq:min_problem} posses a unique global minimum $\vl(\vmu)$ which is
-also solution to the system \eqref{eq:moment_system}.
+Therefore the problem \eqref{eq:min_problem} possesses a unique global minimum $\vl(\vmu)$ which is also solution to the system \eqref{eq:moment_system}.
 
 
 \subsection{Projection to exponential family}
@@ -525,6 +526,88 @@ For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can dir
 \[
     \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\rho}_{W^r_2}.
 \]
+
+\subsection{Benchmark distributions}
+
+Following representative distributions were chosen to verify our assumptions. Majority of them were selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
+
+Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
+
+Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
+
+
+To further challenge our approach we implemented composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
+
+$ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
+
+
+The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
+
+The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which has wide support. 
+
+Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
+\begin{equation}
+    f(x)=
+    \begin{cases}
+      4/5, & x < 0.3 \text{ or } x > 0.8 \\
+      1, & 0.4 < x < 0.5 \\
+      5/4, & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+Abyss is based on normal distribution
+  \begin{equation}
+    f(x)=
+    \begin{cases}
+      0.1, & -0.1 \geq x \leq 0.1 \\   
+      \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+
+
+
+
+\begin{figure}[htb]
+    \centering % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/norm.pdf}
+  \caption{normal}
+  \label{fig:normal}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
+  \caption{two-gaussians}
+  \label{fig:two-gaussians}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
+  \caption{five-fingers}
+  \label{fig:five-fingers}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
+  \caption{Cauchy}
+  \label{fig:cauchy}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/discontinuous.pdf}
+  \caption{discontinuous}
+  \label{fig:discontinuous}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
+  \caption{abyss}
+  \label{fig:abyss}
+\end{subfigure}
+\caption{Benchmark distributions}
+\label{fig:images}
+\end{figure}
+\FloatBarrier
+
+
 \subsection{Estimation error}
 We start with sensitivity estimate for the nonlinear system \eqref{eq:moment_system}.
 
@@ -533,22 +616,63 @@ We start with sensitivity estimate for the nonlinear system \eqref{eq:moment_sys
 Let $\estvl(\estvmu)$ be the solution of the system \eqref{eq:moment_system} for an approximation 
 $\estvmu \in \mathcal M$ of the moments \eqref{eq:gen_moments} and let $\vl(\vmu)$ be the solution 
 for exact moments $\vmu$. Then
-\[
+\begin{equation}
+\label{eq:lambda_mu}
    \abs{\vl - \estvl} \le \frac{1}{\alpha_0} \abs{\vmu - \estvmu} 
-\]
+\end{equation}
 where $\alpha_0$ is the smallest eigenvalue of the Hessian matrix $\tn H(\estvl)$
 \end{lemma}
 \begin{proof}
 Unfortunately we are yet unable to proof this result. So we try some numerical tests.
 
-\includegraphics[width=\textwidth]{mu_to_lambda.pdf}
+Based on numerical experiments, we try to show that the relation \ref{eq:lambda_mu} holds true for all our benchmark distributions. $M=25$ was utilized.
+ The results are depicted in the picture \ref{fig:lambda_kl_tv}. In graphic terms, the formula \ref{eq:lambda_mu} is valid if all red dots with coordinates ($|\vmu - \estvmu|, \alpha_{0}|\vl - \estvl|$) are on or below the black line. The line represents the axis of the first quadrant. 
 
-The blue dots have coordinates: $(|\vmu - \estvmu|, |\vl - \estvl|)$, blue lines are estimates for bounds from \cite{Barron1991}. The red dots are $(|\vmu - \estvmu|, \alpha_0|\vl - \estvl|)$,
-red line have slope $\alpha_0$. The results for the six test distributions suggest validity of our estimate at least when the moment error $|\vmu - \estvmu|$ is not to large.
+
+The data for the six benchmark distributions suggest validity of lemma \ref{thm:lambda_est} at least when the moment error $|\vmu - \estvmu|$ is not to large.
+\begin{figure}[!htb]
+\begin{center} 
+\includegraphics[width=\textwidth]{lambda_kl_tv.pdf}
+\end{center} 
+\caption{Estimation error}
+\label{fig:lambda_kl_tv}
+\end{figure} 
 
 Further numerical tests confirms that the eigenvalues of the Hessian $\tn H(\estvl)$ are usually close to one. And smallest eigenvalue seems to increase as $\estvl$ tends to $\vl$. 
 $\tn H(\estvl)$ should be very close to one, but it is not the case for some test distributions, but the limit value is somewhat smaller. Possibly that could be caused by insuficient normalization. 
 However it seems that the lambda bound holds even without renormalization.
+
+
+
+In addition to verifying the validity of the formula \ref{eq:lambda_mu}, we also tried to show the KL divergence and its relation to the total variation \note{It is total variation of two  distributions, it is not total variation of single distribution - roughness of distribution} and has the following general form:
+$$
+TV(p\Vert q) = \frac{1}{2}\Vert p(x) - q(x)\Vert_1.
+$$ 
+
+Pinker's inequality bounds total variation from above in terms of the KL divergence: % (see http://people.lids.mit.edu/yp/homepage/data/LN_fdiv.pdf, https://arxiv.org/pdf/1806.11311.pdf)
+\begin{equation}
+D(\rho_{\vl}\Vert\estrho) \geq (2\log e) {TV}^2(\rho_{\vl}\Vert\estrho).
+\end{equation}
+
+\note{KL divergence $D(\rho_{\vl}\Vert\estrho)$ was calculated as $D(\rho_{\vl}\Vert\estrho) = (\vl - \hat{\vl})\vmu$}
+
+To depict this relation we added
+the blue dots with coordinates: $(|\vmu - \estvmu|, \sqrt{\frac{D(\rho_{\vl}\Vert\estrho)}{C_M}})$
+and the green dots $(|\vmu - \estvmu|, \sqrt{\frac{(2\log e) {TV}^2(\rho_{\vl}\Vert\estrho)}{C_M}})$.
+
+
+Where the blue dots y-axis coordinates are based on KL divergence estimation error upper bound $$D(\rho_{\lambda} \Vert \hat{\rho}) \leq C_M \Vert \vmu - \hat{\vmu}\Vert^2,$$ where $C_M = 2\exp\{\Vert log(\rho / \rho_{\vl}) \Vert_{L^{\infty}} + 1\}$, for details see \cite[p. 1358]{Barron1991}.
+
+Given the KL divergence total variation comparison, we can assume that with a decreasing $D(\rho_{\lambda} \Vert \hat{\rho})$, the ${TV}(\rho_{\vl}\Vert\estrho)$ will also decrease and it should help reduce roughness of $\hat{\rho}$.
+
+% \includegraphics[width=\textwidth]{mu_to_lambda.pdf}
+
+% The blue dots have coordinates: $(|\vmu - \estvmu|, |\vl - \estvl|)$, blue lines are estimates for bounds from \cite{Barron1991}. The red dots are $(|\vmu - \estvmu|, \alpha_0|\vl - \estvl|)$,
+% red line have slope $\alpha_0$. The results for the six test distributions suggest validity of our estimate at least when the moment error $|\vmu - \estvmu|$ is not to large.
+
+% Further numerical tests confirms that the eigenvalues of the Hessian $\tn H(\estvl)$ are usually close to one. And smallest eigenvalue seems to increase as $\estvl$ tends to $\vl$. 
+% $\tn H(\estvl)$ should be very close to one, but it is not the case for some test distributions, but the limit value is somewhat smaller. Possibly that could be caused by insuficient normalization. 
+% However it seems that the lambda bound holds even without renormalization.
 
 Here, we present some partial results and observations.
 Let us denote $a=\vl\cdot\vphi$ and $b = \estvl\cdot\vphi$. We start with:
@@ -800,7 +924,7 @@ with probability at least $1-p$, where
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Nonlinear solver}
 
-In this section we shall discus numerical solution of the minimization problem \eqref{eq:min_problem}. We prefere this setting over the direct solution of the nonlinear system \eqref{eq:moment_system} as it allows us to prescribe suitable regularization and penalization terms to improve the stability.
+In this section we shall discus numerical solution of the minimization problem \eqref{eq:min_problem}. We prefer this setting over the direct solution of the nonlinear system \eqref{eq:moment_system} as it allows us to prescribe suitable regularization and penalization terms to improve the stability.
 The problem is poorly conditioned unless we choose a basis in which $\tn H(\estvl)$ is close to identity matrix. Crucial observation is that $\tn H(\estvl)$ should be close to the non-centered 
 covariance matrix of  $\vphi(X)$. In particular, if $\hat X$ is a random variable with PDF $\rho_{\estvl}$, then $\tn M \tn H(\estvl) \tn M^T = \Cov \vphi(\hat X)$, where 
 \[
@@ -854,42 +978,6 @@ Now we have for $\hat{\tn H}$ ($N\times N$):
 \todo{Graf s poklesem vlastnich cisel}
 \todo{Graf $\vphi$ for vlastni vektory.}
 
-\subsection{Regularization}
-In order to regularize the density we penalize curvature of
-\[
-\log \rho_{\vl}(x) = p \vl\cdot\vphi.
-\]
-Modified functional is:
-\[
-    F(\lambda; \alpha) = \int_{\Omega} \rho_{\vl} + \frac{\alpha}{2} p \abs{\vl \cdot \vphi ''}^2 \d x- \vl\cdot\vmu.
-\]
-this is still convex functional. Related optimally condition is:
-\[
-    G(\lambda; \alpha) = \int_{\Omega} \vphi p e^{\vl \cdot\vphi} + \alpha p \vl (\vl \cdot \vphi '') \d x- \vmu.
-\]
-And finally the Hessian matrix reads:
-\[
-    H(\vl; \alpha) = \int_{\Omega} \vphi\otimes \vphi p e^{\vl \cdot\vphi} + \alpha \int_{\Omega} p \vphi'' \otimes \vphi''.
-\]
-\[
-H(\estvl; \alpha) = \avg{\vphi \otimes \vphi}_{\estrho} + \alpha R.
-\]
-Since $R(\alpha)$ have first two rows and columns zero:
-\[
-M H(\estvl; \alpha)  M^T   \approx   C + M R(\alpha) M^T =  C + \alpha R.
-\]
-
-Applying preconditioning procedure similar to the non-regularized case, we approximate the first integral by $M Q {\Lambda'} Q^T M^T$ and we denote the second integral $R(\alpha)$. Now we introduce reduced moment functions:
-\[
-    \tilde\vphi =  \tn L \vphi, \quad \tn L =  \tn R \Lambda^{-\frac12} Q^T \tn M
-\]
-
-    \begin{align*}
-      \hat{\tn H} &= \E_{\estrho}\big[ \tilde\vphi \otimes \tilde\vphi\big] + \alpha \tilde R 
-                  = \tn L \E_{\estrho} \big[\vphi \otimes \vphi \big] \tn L^T  + \alpha \tn L R \tn L^T
-                  \approx \tn L M (C + \alpha R)  M^T \tn L^T
-    \end{align*}
-
 
 \section{Choice of moments}
 \subsection{Monomials}
@@ -940,103 +1028,8 @@ TODO:
 
 \item Derive error estimates for density, quantiles, distribution  for various set of moments. How to approximate tails? Is the maximum entropy the best choice?
 
-\item How to use MLMC for generated random fractures, in particular how to make two generated fracture sets that are "correleated".
+\item How to use MLMC for generated random fractures, in particular how to make two generated fracture sets that are "correlated".
 \end{itemize}
-
-\section{Numerical experiments}
-
-\subsection{MLMC sampling algorithm}
-Optimal choice of the sample vector $\vc N$ given by \eqref{eq:opt_n_for_var} or \eqref{eq:opt_n_for_cost} is function $N^{opt}(\vc V, \vc C)$ of the vector of level variances $\vc V$ and the vector of level costs $\vc C$. As $\vc V$ and $\vc C$ are not known a priori, we want to estimate them on the fly from the increasing set of collected samples. as we collect the samples.  Level variances $V_l$ are estimated by the regression \eqref{eq:regression}, sample cost $C_l$ is simply the average sample time of collected samples on the level $l$. 
-In order to collect optimal number of samples we designed a simple iterative Algorithm \ref{algo_sampling}. 
-Initial vector of scheduled samples $N^s_0$ is fixed, in particular we use an arithmetic sequence decreasing form $100$ to $0$. Vector $\vc N^t_0$ of target number of samples is set to $2\,\vc N^s_0$. The iteration $i$ starts with scheduling new samples up to the $\vc N^s_i$.
-Then we wait until at least half of $N^s_i$ is computed. \todo{"half of samples is done" ... to je divne, neni jasne pulka kterych by to mela byt, a jestli to musi byt pulka.}. We collect computed samples and use all available samples to update estimates $\vc V_i$ and $\vc C_i$ for level variances and costs respectively.
-Using these new estimates we determine new target sampling vector $\vc N^t_{i+1}$ and
-add fraction $\alpha$ of the difference to $\vc N^t_{i}$. We iterate until relative difference between target and scheduled sampling vectors is greater then tolerance $\epsilon$ for any level $l$.
-In practice we use parameters $\alpha=0.1$ and $\epsilon = 0.0$
-
-\begin{algorithm}
-    \SetAlgoLined
-    \DontPrintSemicolon
-    %
-    $\vc N^s_0 \gets ( 100, ..., 3)$\;
-    $\vc N^t_0 = 2 \vc N^s_0$\;
-    $i \gets 0$\;
-    \While{ $N^t_{i,l} - N^s_{i,l} > \eps N^s_{i,l}$ for any $l$ }{
-        schedule new samples up to $\vc N^s_i$\;
-        wait until half of samples is done\;
-        estimate $\vc V_i$, $\vc C_i$ from collected samples\;
-        $\vc N^t_{i+1} \gets N^{opt}(\vc V_i, \vc C_i)$\;
-        $\vc N^s_{i+1} \gets \vc N^s_i + \alpha(\vc N^t_{i+1} - \vc N^s_i)$\;
-        $i \gets i+1$\;
-    }
-    \label{algo_sampling}
-    \caption{MLMC samples number estimation}
-\end{algorithm}
-
-Progress of the algorithm is depicted at Figure \ref{fig:n_l_time}.  ... 
-
-\break
-Following graph \ref{fig:n_l_time} and table \ref{mlmc_sampling} provide data for the task of water flowing through unit square using flow123d \cite{flow123d} software. We use five level MC method. Different meshes were created at different levels. First level mesh had just 6 elements, higher levels had meshes with 78, 1730, 40818 and 997606 elements. Whole task was performed on cluster that contains 20 nodes each of them has 2x 10-core CPU and 96 GB RAM, this allowed us to perform parallel computing of samples. Individual sample computations were grouped to the jobs that were scheduled in cluster by PBS software. Each job had approximately same computational cost. Cluster traffic affects the number of currently running jobs. As a result, it can affect the fluency of the sample computations. That probably caused jump $C^c$ around 40th iteration in \ref{fig:n_l_time}.
-
-\todo{Popsat jake byly velikosti siti na jednotlivych urovnich a jaka to vubec byla uloha. Popsat zhruba HW na kterem to bezelo, a davkove zpracovani pomoci PBS. Okomentovat nerovnomerny prubeh krivky dokoncenych vzorku.}
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{time_1.png}
-\caption{Evolution of CPU time for target $C^t$, scheduled $C^s$ and collected samples during iterations of Algorithm \ref{algo_sampling}.}
-\label{fig:n_l_time}
-\end{figure}
-\todo{Upravit typ car: barvou rozlisit $C^s$, $C^t$, $C^c$, plnou carou kompletni cas, carkovane pouze vypocet Flow123d. Tu carkovanou bych udelal jen pro $N_c$. Takze by tam nakonec byly 4 cary.}
-V tomto grafu jsou $C^s$ - naplánované vzorky (estimated), $C^c$ jsou již dokončené vzorky (collected), $C^t$ jsou cílové vzorky pokud bychom je určovali z $C^c$. Po skončení celé MLMC by byly $C^c$ a $C^s$ stejné, $C^t$ jsou na konci menší než $C^s$, protože se ukazuje, že jsme na začátku napočítali více vzorků na nižších úrovních [17, 7, 3] a stačilo by [12, 2, 2]. Různý typ čar jsem zvolil kvůli tomu kdyby to nakonec bylo černobíle, tak aby to bylo k přečtení. Pokud by tam zůstali ty přidané křivky, tak už by to nešlo oddělit stylem čáry. 
-\todo{Proc je graf nakonci uriznuty? Mozna tu tabulku uplne zrusime, ale do grafu by se tedy jeste hodil odhadovany cas naplanovanych uloh. To je asi ten cas estimated v tabulce.  Bylo by z toho snad videt, ze mame celou dobu previs naplanovanych uloh na provedenymi.}
-
-\begin{table}[]
-\caption{Sampling algorithm iterations}
-\centering
-
-\begin{tabular}{|l|l|l|l|l|l|l|}
-\hline
-iteration                                  & samples  & $l_{1}$     & $l_{2}$   & $l_{3}$  & $l_{4}$ & $l_{5}$ \\ \hhline{|=|=|=|=|=|=|=|}
-{\multirow{2}{*}{0}} & collected & 100    & 41    & 17  & 7  & 2  \\ 
-                   & estimated & 2204   & 402   & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{1}                       & collected & 1112   & 402   & 17  & 7  & 3  \\  
-                                         & estimated & 3955   & 612   & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{2}                       & collected & 2103   & 432   & 17  & 7  & 3  \\  
-                                         & estimated & 5545   & 801   & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{3}                       & collected & 2789   & 481   & 17  & 7  & 3  \\  
-%                                          & estimated & 6982   & 971   & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{4}                       & collected & 3777   & 654   & 17  & 7  & 3  \\  
-                                         & estimated & 8261   & 1118  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{5}                       & collected & 4455   & 785   & 17  & 7  & 3  \\ 
-%                                          & estimated & 9435   & 1253  & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{10}                      & collected & 6517   & 926   & 17  & 7  & 3  \\  
-                                         & estimated & 12979  & 1642  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{15}                      & collected & 8668   & 1216  & 17  & 7  & 3  \\  
-%                                          & estimated & 15646  & 1920  & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{20}                      & collected & 9457   & 1268  & 17  & 7  & 3  \\  
-                                         & estimated & 17181  & 2078  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{25}                      & collected & 9950   & 1287  & 17  & 7  & 3  \\ 
-%                                          & estimated & 18081  & 2172  & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{30}                      & collected & 9972   & 1293  & 17  & 7  & 3  \\  
-                                         & estimated & 18671  & 2247  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{35}                      & collected & 10488  & 1322  & 17  & 7  & 3  \\ \ 
-%                                          & estimated & 19021  & 2292  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{40}                      & collected & 16739  & 2102  & 17  & 7  & 3  \\  
-%                                          & estimated & 19233  & 2317  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{45}                      & collected & 16656  & 2065  & 17  & 7  & 3  \\  
-%                                          & estimated & 19368  & 2334  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{50}                      & collected & 16647  & 2055  & 17  & 7  & 3  \\  
-%                                          & estimated & 19473  & 2355  & 17  & 7  & 3  \\ \hline
-% \multirow{2}{*}{54}                      & collected & 16747  & 2050  & 17  & 7  & 3  \\  
-%                                          & estimated & 19504  & 2361  & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{55}                      & collected & 16782  & 2051  & 17  & 7  & 3  \\  
-                                         & estimated & 19544  & 2370  & 17  & 7  & 3  \\ \hline
-\multirow{2}{*}{56}                      & collected & 16783  & 2051  & 17  & 7 & 3  \\  
-                                         & estimated & 19556  & 2373  & 17  & 7 & 3  \\ \hline
-\end{tabular}
-\end{table}
-\FloatBarrier
-
-
 
 
 \section{Sampling  of Random Fields}
@@ -1094,8 +1087,231 @@ The spectral methods sample the field by its Fourier Second kind of methods use 
     \label{fig:flux_approx_pdf}
 \end{figure}
 \todo{Divne je, ze je ten histogram (a stejne tak vsechny histogramy prvnich urovni) uriznuty vpravo.}
+\FloatBarrier
+
+\subsection{Porous media flow problem}
+The functionality of our approach was numerically verified on the example of groundwater flow through a porous media. The aim was to replicate the results from the R. Blaheta et al. \cite{Blaheta20160413}.
+
+\subsection{Model problem}\label{model_problem}
+\todo{Should be described more precisely.}
+
+The groundwater flow is described by the boundary value problem on the unit square:
+\begin{align}
+-div(K(x)\nabla p) &= 0 \\ \nonumber
+-K \nabla p  \cdot \vec{n} &= 0\text{,}
+\end{align}
+where $K$ is hydraulic conductivity, $p$ is pore water pressure, $-K \nabla p$ is the Darcy’s velocity, $\vec{n}$ is unit normal vector.
+
+We are interested in the total flow $Y$ through the specified area
+\begin{equation}
+Y = \int_{0}^{1}[-K\nabla p \cdot \vec{n}] (1, y) dy\text{.}
+\end{equation}
+
+\begin{figure}[!htp]
+\centering
+\includegraphics[width=0.5\linewidth]{porous_media_flow/problem_illustration.png}
+\caption{Problem illustration}
+\label{fig:benchmark_task}
+\centering
+\end{figure}
+\FloatBarrier
+
+\subsection{Results}
+First of all we performed single level Monte Carlo method. We adopted comparable parameters with parameters used by R. Blaheta et. al. \cite{Blaheta20160413}. It means the experiments were performed with grid size of about 80 000 elements (87794~exactly),  $\sigma \in \{1, 2, 4\}$, $\lambda \in \{0.1, 0.3\}$, number of experiments was $\num{2e-4}$.
+
+
+\subsubsection{Spatial random fields generator}
+One of the crucial things to keep in mind when using Monte Carlo methods is a proper generation of random data.
+In our case, the GSTools software library \cite{GSTools} was utilized for generating spatial random fields (SRF).
+The core of the library uses the so-called randomization method, described in detail by Hesse et. al. \cite{Hesse2014}.
+
+To have comparable results with R. Blaheta et. al. we employed the exponential covariance model for our experiments. The model is given by the following correlation function:
+$$
+\rho(r) = \exp\left(-\frac{r}{\lambda}\right),
+$$
+where $\lambda$ is a correlation length.
+
+
+The generation of random fields by the randomization method can be expressed as follows (for details see \cite{Hesse2014}[p. 35])
+
+$$
+u(x) = \sqrt{2 \frac{\sigma^2}{N}} \sum_{i=1}^{N}{\left( Z_i^1\cos(2\pi k_i x) + Z_i^2\sin(2\pi k_i x)   \right)},
+$$
+where $Z_i^j$ are independent Gaussian random variables, $k_i$ are samples from the spectral density distribution of the covariance model, $N$ is Fourier mode number.
+
+
+Our experiments show that for our problem \ref{model_problem} it is advisable to set $N = \num{1e-4}$ instead of the default $N = \num{1e-3}$. This change brings slight increase in computational cost. On the other hand, it significantly reduces "artifacts" in random fields that occurred for smaller $N$. %http://www.ib.pwr.wroc.pl/wpula/w14.pdf
+ 
+Na obrázku \ref{fig:flow_distrs} jsou zobrazeny výsledky pro dvě různé $\lambda \in \{0.1, 0.3\}$ a tři různá $\sigma \in \{1,2,4\}$.
+
+
+
+
+We used MLMC library \cite{mlmclib} to schedule samples and Flow123d simulator \cite{flow123d} to perform underground water flow simulation. 
+
+\begin{figure}[!htp]
+    \centering 
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_1_m_25.pdf}
+  \caption{$\sigma = 1, \lambda=0.1$}
+  \label{fig:cl_0_1_s_1}
+\end{subfigure}\hfil 
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_1_m_25.pdf}
+  \caption{$\sigma = 1, \lambda=0.3$}
+  \label{fig:cl_0_3_s_1}
+\end{subfigure}\hfil 
+
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_2_m_25.pdf}
+  \caption{$\sigma = 2, \lambda=0.1$}
+  \label{fig:cl_0_1_s_2}
+\end{subfigure}\hfil
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_2_m_25.pdf}
+  \caption{$\sigma = 2, \lambda=0.3$}
+  \label{fig:cl_0_3_s_2}
+\end{subfigure}\hfil 
+
+\ContinuedFloat
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_4_m_25.pdf}
+  \caption{$\sigma = 4, \lambda=0.1$}
+  \label{fig:cl_0_1_s_4}
+\end{subfigure}\hfil
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_4_m_25.pdf}
+  \caption{$\sigma = 4, \lambda=0.3$}
+  \label{fig:cl_0_3_s_4}
+\end{subfigure}
+\caption{Reconstructed PDFs and CDFs for executed experiments}
+\label{fig:flow_distrs}
+\end{figure}
+\FloatBarrier
+
+
+
+\begin{figure}[!htp]
+    \centering 
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_1_m_25.pdf}
+  \caption{$\sigma = 1, \lambda=0.1$}
+  \label{fig:cl_0_1_s_1}
+\end{subfigure}\hfil 
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_1_m_25.pdf}
+  \caption{$\sigma = 1, \lambda=0.3$}
+  \label{fig:cl_0_3_s_1}
+\end{subfigure}\hfil 
+
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_2_m_25.pdf}
+  \caption{$\sigma = 2, \lambda=0.1$}
+  \label{fig:cl_0_1_s_2}
+\end{subfigure}\hfil
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_2_m_25.pdf}
+  \caption{$\sigma = 2, \lambda=0.3$}
+  \label{fig:cl_0_3_s_2}
+\end{subfigure}\hfil 
+
+\ContinuedFloat
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_4_m_25.pdf}
+  \caption{$\sigma = 4, \lambda=0.1$}
+  \label{fig:cl_0_1_s_4}
+\end{subfigure}\hfil
+\begin{subfigure}{0.5\textwidth}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_4_m_25.pdf}
+  \caption{$\sigma = 4, \lambda=0.3$}
+  \label{fig:cl_0_3_s_4}
+\end{subfigure}
+\caption{Reconstructed PDFs for executed MLMC experiments. MLMC methods in a particular subgraph have the same domain. For that reason, #L1 results are not the same as in the picture \ref{fig:flow_distrs}.}
+\label{fig:mlmc_flow_distrs}
+\end{figure}
+\FloatBarrier
+
+\subsection{MLMC sampling algorithm}
+Optimal choice of the sample vector $\vc N$ given by \eqref{eq:opt_n_for_var} or \eqref{eq:opt_n_for_cost} is function $N^{opt}(\vc V, \vc C)$ of the vector of level variances $\vc V$ and the vector of level costs $\vc C$. As $\vc V$ and $\vc C$ are not known a priori, we intend to estimate them on the fly from the increasing set of collected samples. Level variances $V_l$ are estimated by the regression \eqref{eq:regression} \todo{pridat popis pouzite regrese}, sample cost $C_l$ is simply the average sample time of collected samples on the level $l$. 
+In order to collect optimal number of samples we designed a simple iterative Algorithm \ref{algo_sampling}. 
+Initial vector of scheduled samples $N^s_0$ is fixed, in particular we use an geometric sequence decreasing form $100$ to $0$. Vector $\vc N^t_0$ of target number of samples is set to $2\,\vc N^s_0$. The iteration $i$ starts with scheduling new samples up to the $\vc N^s_i$.
+Then we wait until at least half of $\vc N^s_i$ is computed. We collect computed samples and utilize all available samples to update estimates $\vc V_i$ and $\vc C_i$ for level variances and costs respectively.
+Employing these new estimates we determine new target sampling vector $\vc N^t_{i+1}$.
+The fraction $\alpha$ of the difference between $\vc N^t_{i+1}$ and $\vc N^t_{i}$ determines the number of added scheduled samples. We iterate until relative difference between target and scheduled sample vectors is greater then tolerance $\epsilon$ for each level $l$.
+In practice we use parameters $\alpha=0.1$ and $\epsilon = 0.5$.
+
+\begin{algorithm}
+    \SetAlgoLined
+    \DontPrintSemicolon
+    %
+    $\vc N^s_0 \gets ( 100, ..., 3)$\;
+    $\vc N^t_0 = 2 \vc N^s_0$\;
+    $i \gets 0$\;
+    \While{ $N^t_{i,l} - N^s_{i,l} > \eps N^s_{i,l}$ for each $l$ }{
+        schedule new samples up to $\vc N^s_i$\;
+        wait until half of samples is done\;
+        estimate $\vc V_i$, $\vc C_i$ from collected samples\;
+        $\vc N^t_{i+1} \gets N^{opt}(\vc V_i, \vc C_i)$\;
+        $\vc N^s_{i+1} \gets \vc N^s_i + \alpha(\vc N^t_{i+1} - \vc N^s_i)$\;
+        $i \gets i+1$\;
+    }
+    \caption{MLMC samples number estimation}
+    \label{algo_sampling}
+\end{algorithm}
+
+Progress of the algorithm is depicted in the Figure \ref{fig:n_l_time}. It provides data for the task of the described porous media flow problem using flow123d \cite{flow123d} software. We employ five level MC method. Different meshes were created at each level. First level mesh have just 6 elements, higher levels meshes consists of 48, 546, 6772 and 87794 elements. Whole task was performed on cluster that contains 20 nodes each of them has 2x 10-core CPU and 96 GB RAM, this allowed us to perform parallel computing of samples. Individual sample computations were grouped to the jobs that were scheduled in cluster by PBS software. Each job had approximately same computational cost. Cluster traffic affects the number of currently running jobs. As a result, it can affect the fluency of the sample computations. That probably caused jump $C^c$ around 40th iteration in \ref{fig:n_l_time}.
+
+\todo{Popsat jake byly velikosti siti na jednotlivych urovnich a jaka to vubec byla uloha. Popsat zhruba HW na kterem to bezelo, a davkove zpracovani pomoci PBS. Okomentovat nerovnomerny prubeh krivky dokoncenych vzorku.}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{sampling_log.pdf}
+\caption{Evolution of CPU time for target $C^t$, scheduled $C^s$ and collected samples during iterations of Algorithm \ref{algo_sampling}.}
+\label{fig:n_l_time}
+\end{figure}
+\todo{Upravit typ car: barvou rozlisit $C^s$, $C^t$, $C^c$, plnou carou kompletni cas, carkovane pouze vypocet Flow123d. Tu carkovanou bych udelal jen pro $N_c$. Takze by tam nakonec byly 4 cary.}
+V tomto grafu jsou $C^s$ - naplánované vzorky (estimated), $C^c$ jsou již dokončené vzorky (collected), $C^t$ jsou cílové vzorky pokud bychom je určovali z $C^c$. Po skončení celé MLMC by byly $C^c$ a $C^s$ stejné, $C^t$ jsou na konci menší než $C^s$, protože se ukazuje, že jsme na začátku napočítali více vzorků na nižších úrovních [17, 7, 3] a stačilo by [12, 2, 2]. Různý typ čar jsem zvolil kvůli tomu kdyby to nakonec bylo černobíle, tak aby to bylo k přečtení. Pokud by tam zůstali ty přidané křivky, tak už by to nešlo oddělit stylem čáry. 
+\todo{Proc je graf nakonci uriznuty? Mozna tu tabulku uplne zrusime, ale do grafu by se tedy jeste hodil odhadovany cas naplanovanych uloh. To je asi ten cas estimated v tabulce.  Bylo by z toho snad videt, ze mame celou dobu previs naplanovanych uloh na provedenymi.}
+
+% \begin{table}[]
+% \caption{Sampling algorithm iterations}
+% \centering
+
+% \begin{tabular}{|l|l|l|l|l|l|l|}
+% \hline
+% iteration                                  & samples  & $l_{1}$     & $l_{2}$   & $l_{3}$  & $l_{4}$ & $l_{5}$ \\ \hhline{|=|=|=|=|=|=|=|}
+% {\multirow{2}{*}{0}} & collected & 100    & 41    & 17  & 7  & 2  \\ 
+%                   & estimated & 2204   & 402   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{1}                       & collected & 1112   & 402   & 17  & 7  & 3  \\  
+%                                          & estimated & 3955   & 612   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{2}                       & collected & 2103   & 432   & 17  & 7  & 3  \\  
+%                                          & estimated & 5545   & 801   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{4}                       & collected & 3777   & 654   & 17  & 7  & 3  \\  
+%                                          & estimated & 8261   & 1118  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{10}                      & collected & 6517   & 926   & 17  & 7  & 3  \\  
+%                                          & estimated & 12979  & 1642  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{20}                      & collected & 9457   & 1268  & 17  & 7  & 3  \\  
+%                                          & estimated & 17181  & 2078  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{30}                      & collected & 9972   & 1293  & 17  & 7  & 3  \\  
+%                                          & estimated & 18671  & 2247  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{55}                      & collected & 16782  & 2051  & 17  & 7  & 3  \\  
+%                                          & estimated & 19544  & 2370  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{56}                      & collected & 16783  & 2051  & 17  & 7 & 3  \\  
+%                                          & estimated & 19556  & 2373  & 17  & 7 & 3  \\ \hline
+% \end{tabular}
+% \end{table}
+% \FloatBarrier
+
+
+
 
 \subsection{Model transport problem}
+
+
+
 \section{Conclusions}
 
 
