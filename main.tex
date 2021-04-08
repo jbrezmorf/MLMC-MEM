@@ -18,6 +18,7 @@
 \usepackage{hhline}
 \usepackage{MnSymbol}
 \usepackage[scientific-notation=true]{siunitx}
+\usepackage{booktabs}
 
 \def\d{\,{\rm d}}               % differential
 \def\vc#1{\mathbf{\boldsymbol{#1}}}     % vector
@@ -48,6 +49,8 @@
 \def\estvmu{{\vc{\hat\mu}}}
 \def\vphi{\vc\phi}
 
+\newlength\lengtha \setlength\lengtha{2mm} % table spacing
+
 
 \title{Robust Density Estimation Using Maximal Entropy Multilevel Monte Carlo method. }
 \author{jan.brezina }
@@ -60,9 +63,9 @@
 
 \section{Introduction}
 Long term safety of an underground radioactive waste repository is assured primarily by the dilution and 
-very slow transport of the contaminants through the suitable rock formations. Maximal concentrations of the contaminant on the surface is of major concern. Unfortunately reliable prediction of the surface concentration is not tractable due to lack of data about highly heterogeneous rock environment. In order to deal with these uncertainties we can model unknown rock properties as random fields and predict probability density function of the surface density. 
-Classical Monte Carlo method needs at least several thousands of samples, which is prohibitively costly in the case of complex simulations. The Multilevel Monte Carlo (MLMC) method introduced by Giles \cite{Giles2008}, \cite{Giles2015} provides a way to estimate mean of an observable at the cost comparable to few forward simulations. Basic idea is to do high volume of samples using a less accurate but cheap approximation and much fewer samples of the difference between the observable and its approximation. If the difference have much smaller variance we obtain the mean estimate with same accuracy at fraction of cost.  The MLMC method has been already studied and analyzed in connection with variety of PDE problems: elliptic equations \cite{Barth2011a}, \cite{Cliffe2011a}, \cite{Abdulle2013}, parabolic equations \cite{Barth2013},
-multiphase flow \cite{Muller2013}, \cite{Lu2016} and other.
+prolonged transport of the contaminants through the suitable rock formations. Maximal concentrations of the contaminant on the surface is of major concern. Unfortunately, reliable prediction of the surface concentration is not tractable due to lack of data about highly heterogeneous rock environment. In order to deal with these uncertainties we can model unknown rock properties as random fields and predict probability density function of the surface density. 
+The classical Monte Carlo method needs at least several thousands of samples, which is prohibitively costly in the case of complex simulations. The Multilevel Monte Carlo (MLMC) method introduced by Giles \cite{Giles2008}, \cite{Giles2015} provides a way to estimate mean of an observable at the cost comparable to few forward simulations. Basic idea is to do a high volume of samples using a less accurate but cheap approximation and much fewer samples of the difference between the observable and its approximation. If the difference has much smaller variance we obtain the mean estimate with the same accuracy at a fraction of cost.  The MLMC method has been already studied and analyzed in connection with a variety of PDE problems: elliptic equations \cite{Barth2011a}, \cite{Cliffe2011a}, \cite{Abdulle2013}, parabolic equations \cite{Barth2013},
+multiphase flow \cite{Muller2013}, \cite{Lu2016} and others.
 
 
 Maximal entropy:
@@ -75,20 +78,20 @@ Elliptic eq. with log normal coefficients \cite{Graham2015}
 
 
 
- However the limitation is that MLMC can compute only approximation of expectation of any random variable. Therefore it is straight forward to make approximation of the mean, the variance and other moments, while it is not possible to approximate the quantiles and the distribution function directly. On the other way, the moment function or characteristic function are given in terms of expectations, which motivates a general approximation of the density function in terms of generalized moments.
+ However, the limitation is that MLMC can compute only approximation of expectation of any random variable. Therefore it is straight forward to make an approximation of the mean, the variance and other moments, while it is not possible to approximate the quantiles and the distribution function directly. On the other way, the moment function or characteristic function are given in terms of expectations, which motivates a general approximation of the density function in terms of generalized moments.
 
 Possible outcomes:
 \begin{itemize}
-    \item Research for suitable statistical models for complex hydrology problems (porosity, conductivity, dispersion, fracture openning, fracture density, ... dependency on the length scale).
+    \item Research for suitable statistical models for complex hydrology problems (porosity, conductivity, dispersion, fracture opening, fracture density, ... dependency on the length scale).
     \item Demonstrate efficiency of MLMC for estimation various moments of relevant quantities of interest.
     \item Demonstrate efficient generation of samples for various types of correlations.
     \item Demonstrate reconstruction of the density function.
 \end{itemize}
 
 \section{Multilevel Monte Carlo method}
-In this section we shall introduce the MLMC estimator and consider its application to a random variable based on a solution to a PDE.
+In this section, we shall introduce the MLMC estimator and consider its application to a random variable based on a solution to a PDE.
 Let $(\Omega, \Sigma, P)$ be a probability space and $X(\omega)$ be a random variable
-which can not be sampled exactly, but we are able to sample its approximation $X^h(\omega)$. 
+that can not be sampled exactly, but we are able to sample its approximation $X^h(\omega)$. 
 Consider classical MC approximation of the expectation $\E X$ by the sample mean:
 \[
     \avg{X}_N = \avg{X^h}_N = \frac{1}{N}\sum_{i=1}^{N} X^h(\omega_i).
@@ -103,7 +106,7 @@ The first term on the right hand side is the sampling error or the variance of t
 \[
     \Var(\avg{X}_N) = \E[\avg{X}_N - \E X^h ]^2 = \frac{1}{N}\Var(X^h).
 \]
- Classical MC method diminish the sampling error just by increasing $N$. Idea of the MLMC method is to introduce another approximation $X^H$ that is cheaper to sample and use the composed estimator
+ Classical MC method diminishes the sampling error just by increasing $N$. The idea of the MLMC method is to introduce another approximation $X^H$ that is cheaper to sample and use the composed estimator
 \[
 	\E X^h \approx \avg{X}_{M,N} = \avg{X^H}_M	 + \avg{X^h - X^H}_N. 
 \]
@@ -111,7 +114,7 @@ the estimator is unbiased with variance
 \[
 	\Var(\avg{X}_{M,N}) =  \frac{1}{M}\Var{X^H} + \frac{1}{N}\Var[X^h-X^H]. 
 \]
-Now we can increase the precision of the estimator by increasing the number $M$ of the cheap coarse samples, while keeping the number $N$ of the expensive fine samples low provided the variance
+Now we can increase the precision of the estimator by increasing the number $M$ of the cheap coarse samples while keeping the number $N$ of the expensive fine samples low provided the variance
 $\Var[X^h-X^H]$ is small. 
 
 This aproach can be futher extened using a sequence of approximations $X^l = X^{h_l}$, for $l=1,\dots, L$.
@@ -138,7 +141,7 @@ The level variances $V_l$ can be estimated using the standard unbiased estimator
 \subsection{Aplication to finite element solutions}
 \todo{Very preliminary, make it more precise. Refer to other applied papers.}
 In particular we are interested in the case $X=F(u)$, where $F$ is a functional representing an observation of
-the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=0,\dots,L$ is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
+the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=0,\dots,L$ \todo{Shouldn't $l$ be from $1$? } is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
 $W^* \subset W$, $u_h$ from $W_{h_l} \subset W$ and assume the usual error estimate in the form:
 \[
 	\norm{u - u_h}_{W} \le h^s \norm{u}_{W^*}
@@ -173,14 +176,14 @@ and the total cost bounded as $C < c \epsilon^{-2}$.
 
 
 \subsection{Optimal choice of number of samples}
-Efficiency of the MLMC estimator \eqref{eq:mlmc_est} depends on the optimal choice of the sample vector $\vc N$. Basic analysis was done by Giles in \cite{Giles2008} and \cite{Giles2015}. In this section we report the formulas \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} for optimal $\vc N$ in the case of given target variance $V$ or in the case of target cost $C$ respectively. Further, we propose slight modification suitable for practical usage.
+Efficiency of the MLMC estimator \eqref{eq:mlmc_est} depends on the optimal choice of the sample vector $\vc N$. Basic analysis was done by Giles in \cite{Giles2008} and \cite{Giles2015}. In this section we report the formulas \eqref{eq:opt_n_for_var} \eqref{eq:opt_n_for_cost} for optimal $\vc N$ in the case of given target variance $V$ or in the case of target cost $C$ respectively. Further, we propose a slight modification suitable for practical usage.
 
 Let  the level variances $V_l$ be given and let us denote $C_l$ the computational cost of a single sample of the difference $\Delta X^l$ at the level $l=1,\dots, L$. For a given target variance $V$ (c.f. \eqref{eq:var_mlmc}), we want to minimize the total cost
 \begin{equation}
     \label{eq:total_cost}
 	C = \sum_{l=1}^{L} C_l N_l.
 \end{equation}
-This leads to minimization problem for the functional
+This leads to a minimization problem for the functional
 \[
 	\Phi(N_1, \dots, N_L,\lambda) = \sum_l C_l N_l + \lambda \Big(\sum_l \frac{V_l}{N_l} - V\Big).
 \]
@@ -189,7 +192,7 @@ Straightforward calculation then provides optimal choice of $\vc N$ for given $V
 	\label{eq:opt_n_for_var}
 	N_l^V = \sqrt{\frac{V_l}{C_l}} \frac{S}{V},\ \text{for }l=1,\dots, L,\quad \text{with } S = \sum_{i=1}^L \sqrt{V_i C_i}.
 \end{equation}
-Similarly we obtain $\vc N$ that minimize the total variance for the fixed total cost $C$ as
+Similarly, we obtain $\vc N$ that minimize the total variance for the fixed total cost $C$ as
 \begin{equation}
 	\label{eq:opt_n_for_cost}
 	N_l^C = \sqrt{\frac{V_l}{C_l}} \frac{C}{S}
@@ -219,7 +222,7 @@ in the case of fixed cost $C$. This modification increase the total variance or 
 \[
 	N_l^{V*} = \frac{V_l L}{V} < N_l^V 
 \]
-happen for a single level $l$, then increase in the total variance is
+happen for a single level $l$, then an increase in the total variance is
 \[
     V^* - V = \frac{V}{L} - \frac{V_l}{N_l^V} \le \frac{V}{L}
 \]
@@ -227,27 +230,27 @@ and similarly for $N_l^{C*}$.
 
 
 
-\subsection{Estimate level variances and costs}
+\subsection{Estimate level variances and costs}\label{est_var_cost}
 \label{sec:VarEst}
 As the exact values for $V_l$ and $C_l$ in \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are not available they are estimated from initial fraction of the samples. In particular $V_l$ is estimated by standard unbiased variance estimater $\widehat V_l$ and $C_l$ by a mean of times of collected samples 
 $\widehat C_l$. Error of these estimates can be quite large especially on higher levels. 
 
 
 
-In order to make MLMC algorithm fully automatic we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather setup a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover we also combine data for different moments.
+In order to make MLMC algorithm fully automatic, we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather set up a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover, we also combine data for different moments.
 
 
 Using the approximation:
 \[
  \log \widehat V_l = \log V_l + \epsilon + O(\epsilon^2), \quad \epsilon = \frac{\widehat V_l - V_l}{V_l}
 \]
-we obtain approximation for its variance as:
+we obtain an approximation for its variance as:
 \[
    \Var(\log \widehat V_l) = \Var\left[ \frac{\sum_{i=1}^{N_l} Y_i^2}{N_l -1}\right]  \approx \frac{1}{N-1}
 \]
 for some standardized i.i.d. samples $Y_i$.
 
-Under assumption, that regression model $lm(\vc \alpha)$ fits well we have 
+Under the assumption, that regression model $lm(\vc \alpha)$ fits well we have 
 \[
  1 = (N-1) \Var[log \widehat V] = \E[ (\log \widehat V - lm(\alpha))^2 (N-1) ] 
 \]
@@ -257,7 +260,7 @@ Under assumption, that regression model $lm(\vc \alpha)$ fits well we have
   W_l = \sqrt{N_l-1}*(\log \widehat V_l - lm(\widehat{\vc\alpha}))
 \]  
   is approximately $N(0,1)$. We use test for variance and possibly 
-reduce number of levels used for regression. If
+reduce the number of levels used for regression. If
 \[
   \sum_l W_l^2 > \chi^2_{N-1}(1-\alpha). 
 \]
@@ -344,12 +347,12 @@ Notes:
 \end{itemize}
 
 
-\section{Maximal Entropy method}
+\section{Maximal Entropy method}\label{mem}
 
-The MLMC  estimator \eqref{eq:mlmc_est} can be applied to estimate any generalized moment $\E[\phi(X)]$ 
+The MLMC estimator \eqref{eq:mlmc_est} can be applied to estimate any generalized moment $\E[\phi(X)]$ 
 of the random variable $X$ using the same set of random samples. Taking a suitable 
 set of such moments it is possible to construct an approximation to the PDF of $X$. This section first
-summarize the Maximal Entropy method and related theoretical results slightly simplifying proofs form \cite{Barron1991}. Later we provide natural selection of the polynomial basis based on the estimate of the covariance matrix and we show that this choice significantly improves convergence of the related optimization problem.
+summarizes the Maximal Entropy method and related theoretical results slightly simplifying proofs from \cite{Barron1991}. Later we provide a natural selection of the polynomial basis based on the estimate of the covariance matrix. We show that this choice significantly improves the convergence of the related optimization problem.
 
 Let $X$ be a continuous random variable with density function $\rho$ that have bounded support
 $supp(\rho) \subset \Omega$ for a finite interval $\Omega \subset \R$. Further consider generalized moments
@@ -370,7 +373,7 @@ to the random variables $\phi_m(X)$, $m=1,\dots, M$ we obtain estimates of gener
     \label{eq:mlmc_est_moments}
     \estvmu = \avg{\vphi} = \sum_{l=1}^L \frac{1}{N_l} \sum_{i=1}^{N_l} \Delta^l\vphi(X_i^l)
 \end{equation}
-as well as estimate for the error:
+as well as an estimate for the error:
 \[
     \Var(\avg{\vphi}_{\vc N}) =  \sum_{l=1}^{L} \frac{1}{N_l} \Var{\Delta^l\vphi} 
     \approx \sum_{l=1}^{L} \frac{1}{N_l} \var{\Delta^l\vphi}_{N_l}.
@@ -386,10 +389,10 @@ Similarly, we can obtain MLMC estimate of the covariance matrix $\tn C = \Cov{\v
 The same set of samples can be used in estimators \eqref{eq:mlmc_est}, \eqref{eq:mlmc_est_moments}, and \eqref{eq:mlmc_est_cov} as well as in the estimators of their errors.
 
 
-Our next goal is to find an approximation $\rho^M$ to the unknown density $\rho$ based only on values $\vmu \in \mathcal M$ of the generalized moments. From the infinite set of such densities we choose the one that maximize the Shannon's entropy,
+Our next goal is to find an approximation $\rho^M$ to the unknown density $\rho$ based only on values $\vmu \in \mathcal M$ of the generalized moments. From the infinite set of such densities, we choose the one that maximizes Shannon's entropy,
 $S = -\E_\rho[\log \rho]$,
 which corresponds to the minimization of any additional information. 
-In slight generalization of this approach, we assume a prior density $p$ and going to minimize the Kullback-Leibler divergence:
+In a slight generalization of this approach, we assume a prior density $p$ and going to minimize the Kullback-Leibler divergence:
 \[
     D(\rho\Vert p) = \int_\Omega \rho \log(\rho / p) \d x,
 \]
@@ -429,7 +432,7 @@ The system \eqref{eq:moment_system} represents optimality conditions to the mini
     \label{eq:min_problem}
     \text{minimize}(\vc\lambda):\quad F(\vl) = \int_{\Omega} \rho_{\vl} - \vl\cdot\vmu.
 \end{equation}
-The functional is strictly convex due to strict convexity of $e^t$ (note also that $\tn H$ is SPD Hessian of $F$). 
+The functional is strictly convex due to the strict convexity of $e^t$ (note also that $\tn H$ is SPD Hessian of $F$). 
 Therefore the problem \eqref{eq:min_problem} possesses a unique global minimum $\vl(\vmu)$ which is also solution to the system \eqref{eq:moment_system}.
 
 
@@ -464,7 +467,7 @@ Due to \eqref{eq:moment_system} it holds $\E_{\rho}[\vphi] = \E_{\rho_{\vl}}[\vp
  + \int_\Omega \rho (\vl - \estvl)\cdot \vc \phi = D(\rho\Vert\rho_{\vl}) + D(\rho_{\vl}\Vert\estrho).
 \]
 \end{proof}
-The first term  on the right side of \eqref{eq:decomposition} corresponds to the approximation error of the familly $\mathcal F_p$ while the second term with $\estvl = \estvl(\estvmu)$ represents the error due to the moment estimation. 
+The first term on the right side of \eqref{eq:decomposition} corresponds to the approximation error of the family $\mathcal F_p$ while the second term with $\estvl = \estvl(\estvmu)$ represents the error due to the moment estimation. 
 
 \subsection{Approximation error}
 Following estimates are based on \cite[Lemma 2]{Barron1991} 
@@ -482,7 +485,7 @@ Following estimates are based on \cite[Lemma 2]{Barron1991}
  for any constant $c$.
 \end{lemma}
 
-Then for the approximation error we have:
+Then for the approximation error, we have:
 \begin{lemma}
 \label{thm:approx_error}
 For given approximation space $\mathcal V_M$ and density $\rho\in C_{\vmu}$ let us denote
@@ -529,21 +532,21 @@ For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can dir
 
 \subsection{Benchmark distributions}
 
-Following representative distributions were chosen to verify our assumptions. Majority of them were selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
+Following representative distributions were chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
 
 Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
 
 Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
 
 
-To further challenge our approach we implemented composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
+To further challenge our approach we implemented a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
 
 $ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
 
 
 The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
 
-The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which has wide support. 
+The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which have wide support. 
 
 Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
 \begin{equation}
@@ -609,7 +612,7 @@ Abyss is based on normal distribution
 
 
 \subsection{Estimation error}
-We start with sensitivity estimate for the nonlinear system \eqref{eq:moment_system}.
+We start with a sensitivity estimate for the nonlinear system \eqref{eq:moment_system}.
 
 \begin{lemma}
 \label{thm:lambda_est}
@@ -629,7 +632,7 @@ Based on numerical experiments, we try to show that the relation \ref{eq:lambda_
  The results are depicted in the picture \ref{fig:lambda_kl_tv}. In graphic terms, the formula \ref{eq:lambda_mu} is valid if all red dots with coordinates ($|\vmu - \estvmu|, \alpha_{0}|\vl - \estvl|$) are on or below the black line. The line represents the axis of the first quadrant. 
 
 
-The data for the six benchmark distributions suggest validity of lemma \ref{thm:lambda_est} at least when the moment error $|\vmu - \estvmu|$ is not to large.
+The data for the six benchmark distributions suggest the validity of lemma \ref{thm:lambda_est} at least when the moment error $|\vmu - \estvmu|$ is not too large.
 \begin{figure}[!htb]
 \begin{center} 
 \includegraphics[width=\textwidth]{lambda_kl_tv.pdf}
@@ -639,7 +642,7 @@ The data for the six benchmark distributions suggest validity of lemma \ref{thm:
 \end{figure} 
 
 Further numerical tests confirms that the eigenvalues of the Hessian $\tn H(\estvl)$ are usually close to one. And smallest eigenvalue seems to increase as $\estvl$ tends to $\vl$. 
-$\tn H(\estvl)$ should be very close to one, but it is not the case for some test distributions, but the limit value is somewhat smaller. Possibly that could be caused by insuficient normalization. 
+$\tn H(\estvl)$ should be very close to one, but it is not the case for some test distributions, but the limit value is somewhat smaller. Possibly that could be caused by insufficient normalization. 
 However it seems that the lambda bound holds even without renormalization.
 
 
@@ -816,7 +819,7 @@ combining together:
  \ge (1-\epsilon)\int_\Omega  \big[ (\vl_0 - \vl_r) \cdot \vphi \big]^2 e^{\vl_r \cdot \vphi}
  -C \int_\Omega e^\frac{(\vl_r + \vl_0) \cdot \vphi}{2}
 \end{align*}
-However the last term is 
+However, the last term is 
 
 
 
@@ -918,11 +921,11 @@ with probability at least $1-p$, where
     V = \sum_r \sum_l \frac{1}{N_l} \Var \delta^l\phi_r \approx \sum_r \sum_l \frac{1}{N_l} \hat{\Var} \delta^l\phi_r 
 \]
 
-\todo{Plot KL divergence between approximations for different $M$. We should have drop in error up to level where the Estimation error dominates.}
+\todo{Plot KL divergence between approximations for different $M$. We should have a drop in error up to level where the Estimation error dominates.}
 \todo{Choice of basis leading to $\alpha_0 \approx 1$.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Nonlinear solver}
+\subsection{Nonlinear solver}\label{nonlinear_solver}
 
 In this section we shall discus numerical solution of the minimization problem \eqref{eq:min_problem}. We prefer this setting over the direct solution of the nonlinear system \eqref{eq:moment_system} as it allows us to prescribe suitable regularization and penalization terms to improve the stability.
 The problem is poorly conditioned unless we choose a basis in which $\tn H(\estvl)$ is close to identity matrix. Crucial observation is that $\tn H(\estvl)$ should be close to the non-centered 
@@ -943,7 +946,7 @@ Since $\rho_{\estvl}$ is approximation of $\rho$, the covariance of $\vphi(\hat 
 
 In order to exploit these observations, we first choose an initial set of linearly independent 
 moment functions $\phi_m$, $m=1,\dots,M$ with $\phi_1=1$. These form a base of the space $\mathcal V_M$.
-Next, we compute the estimate $\hat{\tn C}$ of the covariance matrix using the estimator \eqref{eq:mlmc_est_cov}. The estimated matrix is still symmetric but need not to be positive definite
+Next, we compute the estimate $\hat{\tn C}$ of the covariance matrix using the estimator \eqref{eq:mlmc_est_cov}. The estimated matrix is still symmetric but need not be positive definite
 due to errors on individual levels of the MLMC estimator. 
 
 
@@ -954,7 +957,7 @@ Estimator gives non-central covariance estimate:
 Then we compute the covariance approximation as: $\hat{\tn C} = \tn M \avg{H} \tn M^T$.
 Then we compute eigenvalue decomposition $\hat{\tn C}= P^T \Lambda P$. 
 Then we drop negative eigenvalues and in the remaining sequence
-of decreasing values $\log \lambda_i$ we detect a construct a linear model for a floating window of eigenvalues and detect a point of rapid decrease of the values (Figure). Let us denote $N$ the number of remaining eigen values and eigenvectors. Having eigen values $\lambda_1 \dots \lambda_N$ and $M\times N$ matix $Q$ of remaining eigen vectors in columns. It still holds $Q^T Q = I$ with $[N\times N]$. 
+of decreasing values $\log \lambda_i$ we detect a construct a linear model for a floating window of eigenvalues and detect a point of rapid decrease of the values (Figure). Let us denote $N$ the number of remaining eigenvalues and eigenvectors. Having eigenvalues $\lambda_1 \dots \lambda_N$ and $M\times N$ matrix $Q$ of remaining eigen vectors in columns. It still holds $Q^T Q = I$ with $[N\times N]$. 
 We have:
 \[
    \tn H \approx M^T Q\Lambda' Q^TM
@@ -978,10 +981,19 @@ Now we have for $\hat{\tn H}$ ($N\times N$):
 \todo{Graf s poklesem vlastnich cisel}
 \todo{Graf $\vphi$ for vlastni vektory.}
 
+\begin{figure}[!htp]
+\centering
+\includegraphics[width=0.5\linewidth]{eigenvalues.pdf}
+\caption{Eigenvalues of $\hat{\tn C}$. Those that are below the threshold (vertical line) are removed. $\sigma^2$ represents moments variance which is also the threshold value.}
+\label{fig:eigenvalues}
+\centering
+\end{figure}
+\FloatBarrier
+
 
 \section{Choice of moments}
 \subsection{Monomials}
-First choice for moment functions are monomials:
+The first choice for moment functions are monomials:
 \[
     \phi_r(x) = x^r
 \]
@@ -995,7 +1007,7 @@ In order to improve conditioning of the problem we should use centralized moment
 with $\mu_0 = 1$.
 
 However as the entropy function $e_n(x) = -\ln(\rho_n)$ is a linear combination of the generalized moment functions, it may expect that using monomials leads to badly conditioned non-linear problem. In order to 
-get better conditioning needs to choice moment functions to be nearly orthogonal and possibly with small support.
+get better conditioning needs to choose moment functions to be nearly orthogonal and possibly with small support.
 
 \subsection{Fourier moment functions}
 
@@ -1017,14 +1029,14 @@ and covariance:
     C_Z(\vc x, \vc y) = \E\big[ (Z(\vc x) - \mu(\vc x))(Z(\vc y) - \mu(\vc y)) \big]
 \]
 
-We restrict ourself to the case of stationary fields, where $C$ depends only on $(\vc x - \vc y)$. Our aim is to compute lot of realizations of the field fro a fixed set of points. Further on, we focus on the zero-mean fields:
+We restrict ourselves to the case of stationary fields, where $C$ depends only on $(\vc x - \vc y)$. Our aim is to compute lot of realizations of the field fro a fixed set of points. Further on, we focus on the zero-mean fields:
 \[
     \tilde Z(\vc x) = Z(\vc x) - \mu(\vc x), \E(\tilde Z) = 0.
 \]
 
 TODO:
 \begin{itemize}
-\item Approximation of quantiles or distribution function via. density is not optimal, since the error is accumulated through integration of the density. Consider approximation of distribution via. approximation of Havyside function (see Giles), propose some approximation for quantiles.
+\item Approximation of quantiles or distribution function via. density is not optimal, since the error is accumulated through the integration of the density. Consider approximation of distribution via. approximation of Havyside function (see Giles), propose some approximation for quantiles.
 
 \item Derive error estimates for density, quantiles, distribution  for various set of moments. How to approximate tails? Is the maximum entropy the best choice?
 
@@ -1032,7 +1044,7 @@ TODO:
 \end{itemize}
 
 
-\section{Sampling  of Random Fields}
+\section{A sampling of Random Fields}
 This section is devoted to the problematic of generating cross-correlated random fields.
 
 \subsection{Random Field}
@@ -1073,34 +1085,34 @@ There are two kinds of methods: decomposition and spectral methods. The decompos
     Z(\vc x, \omega) = \mu(\vc x) +  \sum_{i = 1}^\infty \sqrt{\lambda_i} \xi_i(\omega) \phi_i(\vc x)
 \]
 where  $\xi_i$ are uncorrelated random variables, $\lambda_i$ are the eigenvalues and  $\phi_i$ are 
-the eigenfunctions of the correlation operator. In the case of fixed evaluation points we have just finite
-dimension, correlation operator is correlation matrix and sum is finite. As the eigenvalues usually decrease
+the eigenfunctions of the correlation operator. In the case of fixed evaluation points, we have just a finite
+dimension, the correlation operator is a correlation matrix and sum is finite. As the eigenvalues usually decrease
 rapidly we can use truncated sum, i.e. truncated KL expansion.
 
 The spectral methods sample the field by its Fourier Second kind of methods use sp
 
 \section{Numerical experiments}
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{01_cond_pdf_cdf.pdf}
-    \caption{Approximation a PDF of the total flux through a square domain with random conductivity. Use 11 Legendere moments.}
-    \label{fig:flux_approx_pdf}
-\end{figure}
-\todo{Divne je, ze je ten histogram (a stejne tak vsechny histogramy prvnich urovni) uriznuty vpravo.}
-\FloatBarrier
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{01_cond_pdf_cdf.pdf}
+%     \caption{Approximation a PDF of the total flux through a square domain with random conductivity. Use 11 Legendere moments.}
+%     \label{fig:flux_approx_pdf}
+% \end{figure}
+% \todo{Divne je, ze je ten histogram (a stejne tak vsechny histogramy prvnich urovni) uriznuty vpravo.}
+% \FloatBarrier
 
 \subsection{Porous media flow problem}
-The functionality of our approach was numerically verified on the example of groundwater flow through a porous media. The aim was to replicate the results from the R. Blaheta et al. \cite{Blaheta20160413}.
+The functionality of our approach is numerically verified on the task of groundwater flow through porous media. The purpose is to replicate the results from R. Blaheta et al. \cite{Blaheta20160413}.
 
 \subsection{Model problem}\label{model_problem}
-\todo{Should be described more precisely.}
+\todo{Should be described more precisely?}
 
 The groundwater flow is described by the boundary value problem on the unit square:
 \begin{align}
 -div(K(x)\nabla p) &= 0 \\ \nonumber
 -K \nabla p  \cdot \vec{n} &= 0\text{,}
 \end{align}
-where $K$ is hydraulic conductivity, $p$ is pore water pressure, $-K \nabla p$ is the Darcy’s velocity, $\vec{n}$ is unit normal vector.
+$K$ is hydraulic conductivity, $p$ is pore water pressure, $-K \nabla p$ is Darcy’s velocity, $\vec{n}$ is a unit normal vector.
 
 We are interested in the total flow $Y$ through the specified area
 \begin{equation}
@@ -1116,132 +1128,292 @@ Y = \int_{0}^{1}[-K\nabla p \cdot \vec{n}] (1, y) dy\text{.}
 \end{figure}
 \FloatBarrier
 
-\subsection{Results}
-First of all we performed single level Monte Carlo method. We adopted comparable parameters with parameters used by R. Blaheta et. al. \cite{Blaheta20160413}. It means the experiments were performed with grid size of about 80 000 elements (87794~exactly),  $\sigma \in \{1, 2, 4\}$, $\lambda \in \{0.1, 0.3\}$, number of experiments was $\num{2e-4}$.
+\subsection{Methods and parameters}
+The experiments are executed under the following conditions.
+The input random fields have parameters comparable to those used by R. Blaheta et. al. \cite{Blaheta20160413}. The size of the finest mesh is about 80 000 elements (87794~exactly). 
 
-
-\subsubsection{Spatial random fields generator}
-One of the crucial things to keep in mind when using Monte Carlo methods is a proper generation of random data.
-In our case, the GSTools software library \cite{GSTools} was utilized for generating spatial random fields (SRF).
-The core of the library uses the so-called randomization method, described in detail by Hesse et. al. \cite{Hesse2014}.
-
-To have comparable results with R. Blaheta et. al. we employed the exponential covariance model for our experiments. The model is given by the following correlation function:
+Six different spatial random fields (SRF) are in use. The GSTools software library \cite{GSTools} is utilised for generating SRF. The randomisation method, described in detail by Hesse et. al., \cite{Hesse2014}, is the core of the library. The exponential covariance model is employed for our experiments. The model is given by the following correlation function:
 $$
 \rho(r) = \exp\left(-\frac{r}{\lambda}\right),
 $$
-where $\lambda$ is a correlation length.
-
-
-The generation of random fields by the randomization method can be expressed as follows (for details see \cite{Hesse2014}[p. 35])
-
+where $\lambda$ is a correlation length. The generation of random fields by the randomisation method can be expressed as follows (for details see  \cite{Hesse2014}[p. 35])
 $$
 u(x) = \sqrt{2 \frac{\sigma^2}{N}} \sum_{i=1}^{N}{\left( Z_i^1\cos(2\pi k_i x) + Z_i^2\sin(2\pi k_i x)   \right)},
 $$
-where $Z_i^j$ are independent Gaussian random variables, $k_i$ are samples from the spectral density distribution of the covariance model, $N$ is Fourier mode number.
+where $Z_i^j$ are independent Gaussian random variables, $k_i$ are samples from the spectral density distribution of the covariance model, $N$ is a Fourier mode number.
+Our experiments show that for our problem \ref{model_problem}, it is advisable to set $N=10^4$ instead of the default $N=10^3$. This adjustment brings a slight increase in computational cost. On the other hand, it significantly reduces "artefacts" in random fields that might occur with smaller $N$. %http://www.ib.pwr.wroc.pl/wpula/w14.pdf
+Two correlation lengths $\lambda \in \{0.1, 0.3\}$ are considered, and three distinct standard deviations $\sigma \in \{1, 2, 4\}$ are compared for both.
+
+Standard Monte Carlo method and multilevel Monte Carlo methods are executed. In both cases, the number of samples $\vc N$ is determined with respect to attaining the target variance $V$ of each of $M$ moments. In this case, $V=10^{-5}$ and $M=25$. In each of the six cases, the moments are calculated on the same domain, so it is possible to compare chosen Monte Carlo methods.
+
+The trust-region numerical optimization method is employed to solve the maximum entropy method numerically. %described in section \ref{mem}.
+Python SciPy library implementation of that method is adopted (for details see  \cite{Conn20000125}[p. 169 - 200]). The tolerance of the method is set to $10^{-7}$. It means a gradient norm must be less than $10^{-7}$ to terminate successfully. The maximum number of iterations is 30, which is sufficient for all our experiments. Initial $\vl = [1, 0, ..., 0]$. 
 
 
-Our experiments show that for our problem \ref{model_problem} it is advisable to set $N = \num{1e-4}$ instead of the default $N = \num{1e-3}$. This change brings slight increase in computational cost. On the other hand, it significantly reduces "artifacts" in random fields that occurred for smaller $N$. %http://www.ib.pwr.wroc.pl/wpula/w14.pdf
+
+% \subsubsection{Spatial random fields generator}
+% One of the crucial things to keep in mind when using Monte Carlo methods is a proper generation of random data.
+% In our case, the GSTools software library \cite{GSTools} was utilized for generating spatial random fields (SRF).
+% The core of the library uses the so-called randomization method, described in detail by Hesse et. al. \cite{Hesse2014}.
+
+% To have comparable results with R. Blaheta et. al. we employed the exponential covariance model for our experiments. The model is given by the following correlation function:
+% $$
+% \rho(r) = \exp\left(-\frac{r}{\lambda}\right),
+% $$
+% where $\lambda$ is a correlation length.
+
+
+% The generation of random fields by the randomization method can be expressed as follows (for details see \cite{Hesse2014}[p. 35])
+
+% $$
+% u(x) = \sqrt{2 \frac{\sigma^2}{N}} \sum_{i=1}^{N}{\left( Z_i^1\cos(2\pi k_i x) + Z_i^2\sin(2\pi k_i x)   \right)},
+% $$
+% where $Z_i^j$ are independent Gaussian random variables, $k_i$ are samples from the spectral density distribution of the covariance model, $N$ is Fourier mode number.
+
+
+% Our experiments show that for our problem \ref{model_problem} it is advisable to set $N = \num{1e-4}$ instead of the default $N = \num{1e-3}$. This change brings slight increase in computational cost. On the other hand, it significantly reduces "artifacts" in random fields that occurred for smaller $N$. %http://www.ib.pwr.wroc.pl/wpula/w14.pdf
  
-Na obrázku \ref{fig:flow_distrs} jsou zobrazeny výsledky pro dvě různé $\lambda \in \{0.1, 0.3\}$ a tři různá $\sigma \in \{1,2,4\}$.
+
+
+MLMC library \cite{mlmclib} and Flow123d simulator \cite{flow123d} are utilized to schedule samples and perform underground water flow simulation. 
+
+% \begin{figure}[!htp]
+%     \centering 
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_1_m_25.pdf}
+%   \caption{$\sigma = 1, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_1}
+% \end{subfigure}\hfil 
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_1_m_25.pdf}
+%   \caption{$\sigma = 1, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_1}
+% \end{subfigure}\hfil 
+
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_2_m_25.pdf}
+%   \caption{$\sigma = 2, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_2}
+% \end{subfigure}\hfil
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_2_m_25.pdf}
+%   \caption{$\sigma = 2, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_2}
+% \end{subfigure}\hfil 
+
+% \ContinuedFloat
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_4_m_25.pdf}
+%   \caption{$\sigma = 4, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_4}
+% \end{subfigure}\hfil
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_4_m_25.pdf}
+%   \caption{$\sigma = 4, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_4}
+% \end{subfigure}
+% \caption{Reconstructed PDFs and CDFs for executed experiments}
+% \label{fig:flow_distrs}
+% \end{figure}
+% \FloatBarrier
 
 
 
+% \begin{figure}[!htp]
+%     \centering 
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_1_m_25.pdf}
+%   \caption{$\sigma = 1, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_1}
+% \end{subfigure}\hfil 
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_1_m_25.pdf}
+%   \caption{$\sigma = 1, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_1}
+% \end{subfigure}\hfil 
 
-We used MLMC library \cite{mlmclib} to schedule samples and Flow123d simulator \cite{flow123d} to perform underground water flow simulation. 
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_2_m_25.pdf}
+%   \caption{$\sigma = 2, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_2}
+% \end{subfigure}\hfil
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_2_m_25.pdf}
+%   \caption{$\sigma = 2, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_2}
+% \end{subfigure}\hfil 
 
+% \ContinuedFloat
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_4_m_25.pdf}
+%   \caption{$\sigma = 4, \lambda=0.1$}
+%   \label{fig:cl_0_1_s_4}
+% \end{subfigure}\hfil
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_4_m_25.pdf}
+%   \caption{$\sigma = 4, \lambda=0.3$}
+%   \label{fig:cl_0_3_s_4}
+% \end{subfigure}
+% \caption{Reconstructed PDFs for executed MLMC experiments. MLMC methods in a particular subgraph have the same domain. For that reason, #L1 results are not the same as in the picture \ref{fig:flow_distrs}.}
+% \label{fig:mlmc_flow_distrs}
+% \end{figure}
+% \FloatBarrier
+
+\subsection{Results}
+\todo{add graphs with histogram for ref not from L1, ref instead of MC}
+The results of the performed experiments are depicted in the Figure \ref{fig:flow_distrs}. The Standard Monte Carlo method with $10^5$ samples is considered to provide a sufficiently accurate solution, thus its reconstructed PDF $\hat{\rho}_{ref}$ is denoted as reference (ref) and it is drawn alongside with histogram. Other reconstructed PDF's $\hat{\rho}_{L}$  originate from data obtained by Monte Carlo methods with a different number of levels $L = 1, 2, 3, 5$ under the constraint of attaining target variance. 
+KL divergence $D$ is utilized to compare densities with MC density, $D := D(\hat{\rho}_{ref}|\hat{\rho}_{L})$.
+Given the fact, the method \ref{nonlinear_solver} dropping some moments from the original number of moments is in use. $M$ in the picture indicates the number of moments actually used out of the original $25$ moments.
 \begin{figure}[!htp]
     \centering 
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_1_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_1.pdf}
   \caption{$\sigma = 1, \lambda=0.1$}
   \label{fig:cl_0_1_s_1}
 \end{subfigure}\hfil 
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_1_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_1.pdf}
   \caption{$\sigma = 1, \lambda=0.3$}
   \label{fig:cl_0_3_s_1}
 \end{subfigure}\hfil 
 
 \centering
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_2_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_2.pdf}
   \caption{$\sigma = 2, \lambda=0.1$}
   \label{fig:cl_0_1_s_2}
 \end{subfigure}\hfil
 \centering
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_2_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_2.pdf}
   \caption{$\sigma = 2, \lambda=0.3$}
   \label{fig:cl_0_3_s_2}
 \end{subfigure}\hfil 
 
 \ContinuedFloat
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_1_s_4_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_4.pdf}
   \caption{$\sigma = 4, \lambda=0.1$}
   \label{fig:cl_0_1_s_4}
 \end{subfigure}\hfil
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/cl_0_3_s_4_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_4.pdf}
   \caption{$\sigma = 4, \lambda=0.3$}
   \label{fig:cl_0_3_s_4}
 \end{subfigure}
-\caption{Reconstructed PDFs and CDFs for executed experiments}
+\caption{Reconstructed PDFs for executed experiments. ref denotes reference PDF $\hat{\rho}_{ref}$, PDFs $\hat{\rho}_{L}$ based on Monte Carlo methods with $L$ levels are also drawn.  $D:=D(\hat{\rho}_{ref}|\hat{\rho}_{L})$. $M$ is number of moments actually used.}
 \label{fig:flow_distrs}
 \end{figure}
 \FloatBarrier
 
+In comparison with R. Blaheta et. al. \cite[Figure 8]{Blaheta20160413} stated approach combining MLMC and maximum entropy method is able to provide us with smoother PDFs.
 
+
+In some cases, most seen especially for $\sigma=1$. The ripples occur in the course of PDF. It is obvious from further experiments that this effect raises with increasing error in moment estimates. To suppress the ripples, suitable regularization is employed. We shall describe this approach in the next article.
+
+
+As can be seen in the figures \ref{fig:cl_0_1_s_4} and \ref{fig:cl_0_3_s_4} it might be difficult to capture the peak of substantially skew distributions. To improve that, PDF reconstruction from the logarithm of the data is employed. Then it is possible to depict the course of distribution as seen in the figure \ref{fig:log_flow_distrs}.
 
 \begin{figure}[!htp]
     \centering 
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_1_m_25.pdf}
-  \caption{$\sigma = 1, \lambda=0.1$}
-  \label{fig:cl_0_1_s_1}
-\end{subfigure}\hfil 
-\begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_1_m_25.pdf}
-  \caption{$\sigma = 1, \lambda=0.3$}
-  \label{fig:cl_0_3_s_1}
-\end{subfigure}\hfil 
-
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_2_m_25.pdf}
-  \caption{$\sigma = 2, \lambda=0.1$}
-  \label{fig:cl_0_1_s_2}
-\end{subfigure}\hfil
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_2_m_25.pdf}
-  \caption{$\sigma = 2, \lambda=0.3$}
-  \label{fig:cl_0_3_s_2}
-\end{subfigure}\hfil 
-
-\ContinuedFloat
-\begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_1_s_4_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/log/cl_0_1_s_4.pdf}
   \caption{$\sigma = 4, \lambda=0.1$}
-  \label{fig:cl_0_1_s_4}
-\end{subfigure}\hfil
+  \label{fig:cl_0_1_s_4_log}
+\end{subfigure}\hfil 
 \begin{subfigure}{0.5\textwidth}
-  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/cl_0_3_s_4_m_25.pdf}
+  \includegraphics[width=\linewidth]{porous_media_flow/MLMC/log/cl_0_3_s_4.pdf}
   \caption{$\sigma = 4, \lambda=0.3$}
-  \label{fig:cl_0_3_s_4}
-\end{subfigure}
-\caption{Reconstructed PDFs for executed MLMC experiments. MLMC methods in a particular subgraph have the same domain. For that reason, #L1 results are not the same as in the picture \ref{fig:flow_distrs}.}
-\label{fig:mlmc_flow_distrs}
+  \label{fig:cl_0_3_s_4_log}
+\end{subfigure}\hfil 
+\caption{Reconstructed PDFs based on logarithm of data}
+\label{fig:log_flow_distrs}
 \end{figure}
 \FloatBarrier
 
+
+The following tables provide a detailed insight into the executed MLMCs which allows to reproduce our results. The number of mesh elements at each level, stated in the table \ref{tab:mesh_elements}, is determined according to the prescribed simulation step range $[h_1, h_L]$, in our case: $[1, 0.0055]$. The simulation step for the particular level is calculated as follows: $h_l = h_1^{(1 - \frac{l-1}{L-1})} h_L^{ \frac{l-1}{L-1}}$.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lccccc}
+        \toprule
+        \multirow{2}{*}{$L$} & \multicolumn{5}{c}{number of mesh elements} \\
+        \cmidrule(lr){2-6}  \\
+        {} & $L_1$ & $L_2$  & $L_3$ & $L_4$ &$L_5$ \\
+        \midrule
+        1 & 87794 &  &   &   &                	 \\
+        2 & 6 & 87794   &    &  &             	 \\
+        3 & 6 & 546 & 87794  &   &        		  \\
+        5 & 6 & 48 & 546 &  6772 &  87794        \\
+        
+        \bottomrule
+    \end{tabular}
+    \caption{Number of mesh elements at levels}
+       \label{tab:mesh_elements}
+\end{table}
+
+The table \ref{tab:n_samples} shows the total amount of samples at each level. Data is provided for each of the six different random field parameter settings. The corresponding $N_l$ increases with increasing $\sigma$ of a random field, where it is harder to attain the given target variance.
+
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{@{} l
+                @{\hspace*{2mm}}     c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c
+                @{\hspace*{\lengtha}}c @{}}
+        \toprule
+        \multirow{2}{*}{$L$} & \multicolumn{5}{c}{$\lambda = 0.1$} & \multicolumn{5}{c}{$\lambda = 0.3$}\\
+        \cmidrule(lr){2-6} \cmidrule(lr){7-11} \\
+        {} & $N_1$ & $N_2$  & $N_3$ & $N_4$ &$N_5$ &  $N_1$ & $N_2$  & $N_3$ & $N_4$ & $N_5$ \\
+        \midrule
+        $\mathit{\sigma}=1$ \\
+        1 & 16448 &  &  &  &               	     & 19996 &  &  &  &   \\
+        2 & 35210 & 16634 &  &  &            	     & 38669 & 22717 &  &  &  \\
+        3 & 62641 & 47559 & 3497 &  &       		 & 43622 & 23811 & 619 &  &    \\
+        5 & 76818 & 62213 & 25241 & 7186 & 1144     & 51198 & 39906 & 21403 & 1799 & 140   \\
+        
+         \midrule
+        $\mathit{\sigma}=2$ \\
+        1 & 16819 &  &  &  &              	     & 19998 &  &  &  &   \\
+        2 & 41145 & 23684 &  &  &             	     & 39673 & 24012 &  &  &   \\
+        3 & 41749 & 41415 & 10300 &  &       		 & 58239 & 49400 & 3032 &  &   \\
+        5 & 91202 & 73695 & 35857 & 10582 & 1546    & 67150 & 60696 & 19636 & 3544 & 499    \\
+        
+         \midrule
+        $\mathit{\sigma}=4$ \\
+        1 & 19449 &  &  &  &                	     &  22322 &  &  &  &   \\
+        2 & 46852 & 32145 &  &  &             	     & 47128 & 24731 &  &  & \\
+        3 & 69732 & 92373 & 11996 &  &      		 &  70652 & 72607 & 5036 &  &   \\
+        5 & 117294 & 174254 & 84036 & 31364 & 4854      & 113190 & 86391 & 34113 & 6844 & 876    \\
+        \bottomrule
+    \end{tabular}
+    \caption{Number of samples at Monte Carlo method levels}
+    \label{tab:n_samples}
+\end{table}
+\FloatBarrier
+
+
 \subsection{MLMC sampling algorithm}
-Optimal choice of the sample vector $\vc N$ given by \eqref{eq:opt_n_for_var} or \eqref{eq:opt_n_for_cost} is function $N^{opt}(\vc V, \vc C)$ of the vector of level variances $\vc V$ and the vector of level costs $\vc C$. As $\vc V$ and $\vc C$ are not known a priori, we intend to estimate them on the fly from the increasing set of collected samples. Level variances $V_l$ are estimated by the regression \eqref{eq:regression} \todo{pridat popis pouzite regrese}, sample cost $C_l$ is simply the average sample time of collected samples on the level $l$. 
-In order to collect optimal number of samples we designed a simple iterative Algorithm \ref{algo_sampling}. 
-Initial vector of scheduled samples $N^s_0$ is fixed, in particular we use an geometric sequence decreasing form $100$ to $0$. Vector $\vc N^t_0$ of target number of samples is set to $2\,\vc N^s_0$. The iteration $i$ starts with scheduling new samples up to the $\vc N^s_i$.
-Then we wait until at least half of $\vc N^s_i$ is computed. We collect computed samples and utilize all available samples to update estimates $\vc V_i$ and $\vc C_i$ for level variances and costs respectively.
-Employing these new estimates we determine new target sampling vector $\vc N^t_{i+1}$.
-The fraction $\alpha$ of the difference between $\vc N^t_{i+1}$ and $\vc N^t_{i}$ determines the number of added scheduled samples. We iterate until relative difference between target and scheduled sample vectors is greater then tolerance $\epsilon$ for each level $l$.
+Optimal choice of the sample vector $\vc N$ given by \eqref{eq:opt_n_for_var} or \eqref{eq:opt_n_for_cost} is function $N^{opt}(\vc V, \vc C)$ of the vector of level variances $\vc V$ and the vector of level costs $\vc C$. As $\vc V$ and $\vc C$ are not known a priori, we intend to estimate them on the fly from the increasing set of collected samples. Level variances $V_l$ are estimated by the regression described in the section \ref{est_var_cost}, sample cost $C_l$ is simply the average sample time of collected samples on the level $l$. 
+In order to collect an optimal number of samples, we designed a simple iterative Algorithm \ref{algo_sampling}. 
+The initial vector of scheduled samples $N^s_0$ is fixed. In particular, we use a geometric sequence decreasing from $100$ to $0$. Vector $\vc N^t_0$ of the target number of samples is set to $2\,\vc N^s_0$. The iteration $i$ starts with scheduling new samples up to the $\vc N^s_i$.
+Then we wait until at least half of $\vc N^s_i$ is computed. We collect computed samples and utilize all available samples to update estimates $\vc V_i$ and $\vc C_i$ for level variances and costs, respectively.
+Employing these new estimates, we determine the new target sampling vector $\vc N^t_{i+1}$.
+The fraction $\alpha$ of the difference between $\vc N^t_{i+1}$ and $\vc N^t_{i}$ determines the number of added scheduled samples. We iterate until the relative difference between target and scheduled sample vectors is greater than tolerance $\epsilon$ for each level $l$.
 In practice we use parameters $\alpha=0.1$ and $\epsilon = 0.5$.
 
 \begin{algorithm}
@@ -1259,22 +1431,23 @@ In practice we use parameters $\alpha=0.1$ and $\epsilon = 0.5$.
         $\vc N^s_{i+1} \gets \vc N^s_i + \alpha(\vc N^t_{i+1} - \vc N^s_i)$\;
         $i \gets i+1$\;
     }
-    \caption{MLMC samples number estimation}
+    \caption{MLMC sampling}
     \label{algo_sampling}
 \end{algorithm}
 
-Progress of the algorithm is depicted in the Figure \ref{fig:n_l_time}. It provides data for the task of the described porous media flow problem using flow123d \cite{flow123d} software. We employ five level MC method. Different meshes were created at each level. First level mesh have just 6 elements, higher levels meshes consists of 48, 546, 6772 and 87794 elements. Whole task was performed on cluster that contains 20 nodes each of them has 2x 10-core CPU and 96 GB RAM, this allowed us to perform parallel computing of samples. Individual sample computations were grouped to the jobs that were scheduled in cluster by PBS software. Each job had approximately same computational cost. Cluster traffic affects the number of currently running jobs. As a result, it can affect the fluency of the sample computations. That probably caused jump $C^c$ around 40th iteration in \ref{fig:n_l_time}.
+The Figure \ref{fig:n_l_time} illustrates the progress of the algorithm. For each iteration of the proposed algorithm, the total CPU times and CPU simulation times are depicted. The five-level Monte Carlo method is performed for simulations of the described porous media flow problem. The simulations are run by the flow123d software \cite{flow123d}. Random field generation, inclusive of creating flow123d input mesh files, is also included in the simulation's CPU time. The difference between the total and the simulation time represents the overhead costs of our algorithm. 
 
-\todo{Popsat jake byly velikosti siti na jednotlivych urovnich a jaka to vubec byla uloha. Popsat zhruba HW na kterem to bezelo, a davkove zpracovani pomoci PBS. Okomentovat nerovnomerny prubeh krivky dokoncenych vzorku.}
+Different meshes were created at each level. First level mesh has just 6 elements; higher levels meshes consist of 48, 546, 6772 and 87794 elements. The whole task was performed on the cluster that contains 20 nodes, each of which has 2x 10-core Intel Xeon Silver 4114 CPU (2.2GHz) and 2x 8 GB DDR4 2400 ECC Reg dual rank. This allows us to perform parallel computing of samples. Individual sample computations were grouped to the jobs that were scheduled by PBS software. Each job had approximately the same computational cost. Cluster traffic affects the number of currently running jobs. As a result, this may affect the continuity of sample collection. That is the reason why leaps occur in $C^c$.
+
+In general, the main decrease of $C^t$ occurs during the first few iterations. Despite the course of $C^t$, the successive iterations might also be beneficial. Concerning the negligible overheads of the sampling algorithm, we can afford to run other iterations within which samples are redistributed across levels. It is beneficial if there are small differences in variances between some levels. At the end of the sampling algorithm, the remaining scheduled samples are collected when finished.
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{sampling_log.pdf}
-\caption{Evolution of CPU time for target $C^t$, scheduled $C^s$ and collected samples during iterations of Algorithm \ref{algo_sampling}.}
+\caption{Evolution of algorithm \ref{algo_sampling} total and simulation (sim) CPU time. $C^t_{i}$ for target samples $N^t_{i}$, $C^s_{i}$ for scheduled samples $N^s_{i}$, $C^c_{i}$ for collected samples $N^t_{i} - N^s_{i}$.}
 \label{fig:n_l_time}
 \end{figure}
-\todo{Upravit typ car: barvou rozlisit $C^s$, $C^t$, $C^c$, plnou carou kompletni cas, carkovane pouze vypocet Flow123d. Tu carkovanou bych udelal jen pro $N_c$. Takze by tam nakonec byly 4 cary.}
-V tomto grafu jsou $C^s$ - naplánované vzorky (estimated), $C^c$ jsou již dokončené vzorky (collected), $C^t$ jsou cílové vzorky pokud bychom je určovali z $C^c$. Po skončení celé MLMC by byly $C^c$ a $C^s$ stejné, $C^t$ jsou na konci menší než $C^s$, protože se ukazuje, že jsme na začátku napočítali více vzorků na nižších úrovních [17, 7, 3] a stačilo by [12, 2, 2]. Různý typ čar jsem zvolil kvůli tomu kdyby to nakonec bylo černobíle, tak aby to bylo k přečtení. Pokud by tam zůstali ty přidané křivky, tak už by to nešlo oddělit stylem čáry. 
-\todo{Proc je graf nakonci uriznuty? Mozna tu tabulku uplne zrusime, ale do grafu by se tedy jeste hodil odhadovany cas naplanovanych uloh. To je asi ten cas estimated v tabulce.  Bylo by z toho snad videt, ze mame celou dobu previs naplanovanych uloh na provedenymi.}
+
 
 % \begin{table}[]
 % \caption{Sampling algorithm iterations}
@@ -1306,9 +1479,6 @@ V tomto grafu jsou $C^s$ - naplánované vzorky (estimated), $C^c$ jsou již dok
 % \FloatBarrier
 
 
-
-
-\subsection{Model transport problem}
 
 
 
