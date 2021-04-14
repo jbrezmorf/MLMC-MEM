@@ -1264,7 +1264,6 @@ MLMC library \cite{mlmclib} and Flow123d simulator \cite{flow123d} are utilized 
 % \FloatBarrier
 
 \subsection{Results}
-\todo{add graphs with histogram for ref not from L1, ref instead of MC}
 The results of the performed experiments are depicted in the Figure \ref{fig:flow_distrs}. The Standard Monte Carlo method with $10^5$ samples is considered to provide a sufficiently accurate solution, thus its reconstructed PDF $\hat{\rho}_{ref}$ is denoted as reference (ref) and it is drawn alongside with histogram. Other reconstructed PDF's $\hat{\rho}_{L}$  originate from data obtained by Monte Carlo methods with a different number of levels $L = 1, 2, 3, 5$ under the constraint of attaining target variance. 
 KL divergence $D$ is utilized to compare densities with MC density, $D := D(\hat{\rho}_{ref}|\hat{\rho}_{L})$.
 Given the fact, the method \ref{nonlinear_solver} dropping some moments from the original number of moments is in use. $M$ in the picture indicates the number of moments actually used out of the original $25$ moments.
