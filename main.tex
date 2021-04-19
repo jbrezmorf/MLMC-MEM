@@ -537,98 +537,6 @@ For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can dir
     \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\log\rho}_{W^r_2}.
 \]
 
-\begin{figure}[!htb]
-\begin{center} 
-\includegraphics[width=0.75\textwidth]{mu_err_iterations.pdf}
-\end{center} 
-\caption{Convergence of the minimization method with preconditioning, M = $85$.}
-\label{fig:convergence}
-\end{figure} 
-\FloatBarrier
-The figure \ref{fig:convergence} describes the convergence of numerical minimization. Distributions are configured as described in section \ref{benchmarks_distr}. The number of 85 exact moments is utilized. Given our preconditioning (cutting eigenvalues below or equal to zero), the truncation of moments occur in cases of five-fingers ($M=81$) and zero-value ($M=57$) distributions.
-\begin{figure}[!htb]
-\begin{center} 
-\includegraphics[width=0.75\textwidth]{mu_err_iterations_no_precond.pdf}
-\end{center} 
-\caption{Convergence of the minimization method without preconditioning, $M = 85$.}
-\label{fig:convergence}
-\end{figure} 
-\FloatBarrier
-\todo{Preconditioning seems to even get worse convergence!?}
-\subsection{Benchmark distributions}\label{benchmark_distr}
-Following representative distributions are chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
-% Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
-Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
-\begin{equation}
-    f(x)=
-    \begin{cases}
-      4/5, & x < 0.3 \text{ or } x > 0.8 \\
-
-The Abyss distribution \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture this distribution by polynomials that have wide support. 
-\begin{equation*}
-    \rho(x)=
-\end{equation*}
-The last distribution that is called zero-value is considered on the interval $x \in [-1, 1]$ with the following PDF
-\begin{equation*}
-    \rho(x)=
-    \begin{cases}
-      0, & x \leq 0.8 \\   
-      50x-40, & \text{elsewhere.}
-    \end{cases}
-\end{equation*}
-Distributions that do not have an explicitly defined interval on which they are considered are implicitly limited to the interval between quantiles $0.001$ and $0.999$.
-
-% \begin{figure}[htb]
-%     \centering % <-- added
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/two-gaussians_exact.pdf}
-%   \caption{two-gaussians}
-%   \label{fig:two-gaussians}
-% \end{subfigure}\hfil % <-- added
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/five-fingers_exact.pdf}
-%   \caption{five-fingers}
-%   \label{fig:five-fingers}
-% \end{subfigure}\hfil
-% \centering
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/cauchy_exact.pdf}
-%   \caption{Cauchy}
-%   \label{fig:cauchy}
-% \end{subfigure} \hfil% <-- added
-% \centering
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/lognorm_exact.pdf}
-%   \caption{log-normal}
-%   \label{fig:discontinuous}
-% \end{subfigure}\hfil % <-- added
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/abyss_exact.pdf}
-%   \caption{abyss}
-%   \label{fig:abyss}
-% \end{subfigure}\hfil
-% \begin{subfigure}{0.5\textwidth}
-%   \includegraphics[width=\linewidth]{benchmark_distributions/rho4.pdf}
-%   \caption{$\rho^4$}
-%   \label{fig:rho4}
-% \end{subfigure}\hfil % <-- added
-% \caption{Approximation error}
-% \label{fig:approx_error}
-% \end{figure}
-% \FloatBarrier
-\end{subfigure}\hfil
-\end{subfigure} % <-- added
-\medskip
-  \includegraphics[width=\linewidth]{benchmark_distributions/lognorm.pdf}
-  \caption{lognormal}
-  \label{fig:lognormal}
-\end{subfigure}\hfil
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/zero_value.pdf}
-  \caption{zero-value}
-  \label{fig:rho4}
-\end{subfigure}\hfil % <-- added
-
 
 \subsection{Estimation error}
 \jb{JB TODO:
@@ -972,7 +880,7 @@ Similarly as in \cite[Theorem 3]{Barron1991} we
 Cite estimates for $D(\rho\Vert\rho_{\lambda})$.
 
 Modify estimates for $D(\rho\Vert\rho_{\lambda})$ using $q=p$ and
-approximation of $Cov_p \vcphi$ for Legendere polynoms $\vc\phi$.
+approximation of $Cov_p \vc\phi$ for Legendere polynoms $\vc\phi$.
 
 Probabilistic result $D(\rho_{\lambda*} \Vert \rho_{\lambda}) < V/p$
 with probability at least $1-p$, where 
@@ -1078,77 +986,6 @@ In order to keep basic smoothness, we may use spline base functions, in particul
 
 
 \section{Synthetic experiments}
-\section{Correlated random fields}
-We what to generate realizations of a random field: $Z(\vc x, \omega)$, for $\vc x$ in domain $D \subset R^d$. We consider {\it second order field}, i.e. with finite variance for every $\vc x\in D$. For such fields we can define mean:
-\[
-    \mu_Z(\vc x) = \E\big[ Z(\vc x) \big]
-\]
-and covariance:
-\[
-    C_Z(\vc x, \vc y) = \E\big[ (Z(\vc x) - \mu(\vc x))(Z(\vc y) - \mu(\vc y)) \big]
-\]
-
-We restrict ourselves to the case of stationary fields, where $C$ depends only on $(\vc x - \vc y)$. Our aim is to compute lot of realizations of the field fro a fixed set of points. Further on, we focus on the zero-mean fields:
-\[
-    \tilde Z(\vc x) = Z(\vc x) - \mu(\vc x), \E(\tilde Z) = 0.
-\]
-
-TODO:
-\begin{itemize}
-\item Approximation of quantiles or distribution function via. density is not optimal, since the error is accumulated through the integration of the density. Consider approximation of distribution via. approximation of Havyside function (see Giles), propose some approximation for quantiles.
-
-\item Derive error estimates for density, quantiles, distribution  for various set of moments. How to approximate tails? Is the maximum entropy the best choice?
-
-\item How to use MLMC for generated random fractures, in particular how to make two generated fracture sets that are "correlated".
-\end{itemize}
-
-
-\section{A sampling of Random Fields}
-This section is devoted to the problem of generating cross-correlated random fields.
-
-\subsection{Random Field}
-Any scalar random field $u(\vc x)$ with mean field $\mu(\vc x)$ and standard error
-field $\sigma(\vc x)$ can be normalized as:
-\[
-    u(\vc x) = \mu(\vc x) + \sigma(\vc x) \tilde{u}(\vc x)
-\]
-where $\tilde{u}$ is a \emph{normalized} random field with zero mean and variance equal to $1$. Therefore we shall discuss only generation of normalized random fields further on. The normalized random field is given by its correlation function:
-\[
-    {\rm Cov}(u(\vc x), u(\vc y) ) = c(\vc x, \vc y)  
-    = \E\big[ (u(\vc x) - \E u(\vc x))(u(\vc y) - \E u(\vc y)) \big]
-\]
-The field is called \emph{stationary} if $c(\vc x, \vc y) = c(\vc x - \vc y)$, i.e. 
-correlation function depends on direction vector but is invariant to changes in position. The field is called \emph{isotropic} if $c(\vc x, \vc y) = c(|\vc x - \vc y|)$, i.e. it is also invariant with respect to rotations. 
-
-The Wiener-Kintchine theorem states that
-\cite{}
-
-\subsection{Variogram function}
-Instead of correlation function we can use the \emph{variogram function} $\gamma$:
-\[
-    \gamma(u(\vc x), u(\vc y)) = \frac12 \E\big[u(\vc x) - u(\vc y)\big].
-\]
-General relation ship between $c$ and $\gamma$ is quite complicated, but if we assume $\E u(\vc x) = 0$, then
-we have:
-\[
-    \gamma(\vc x, \vc y) = \frac12 \big[ c(\vc x, \vc x) + c(\vc y, \vc y)\big] - c(\vc x, \vc y)
-\]
-and in the case of normalized random field:
-\[
-    \gamma(\vc x, \vc y) = 1 - c(\vc x, \vc y)
-\]
-
-
-There are two kinds of methods: decomposition and spectral methods. The decomposition methods use singular value decomposition of the correlation matrix for a fixed set of evaluation points. And use incomplete factorization of the Karhunen-Lo\`eve expansion:
-\[
-    Z(\vc x, \omega) = \mu(\vc x) +  \sum_{i = 1}^\infty \sqrt{\lambda_i} \xi_i(\omega) \phi_i(\vc x)
-\]
-where  $\xi_i$ are uncorrelated random variables, $\lambda_i$ are the eigenvalues and  $\phi_i$ are 
-the eigenfunctions of the correlation operator. In the case of fixed evaluation points, we have just a finite
-dimension, the correlation operator is a correlation matrix and sum is finite. As the eigenvalues usually decrease
-rapidly we can use truncated sum, i.e. truncated KL expansion.
-
-The spectral methods sample the field by its Fourier Second kind of methods use sp
 
 
 % \section{Numerical experiments}
@@ -1260,54 +1097,83 @@ MEM benchmarks for artificial distributions, without MLMC but dealing with noise
 
 Homogenization of flow through square, MLMC + MEM, focus on level variances of a real problem of interest and performance of MLMC MEM as whole}
 
-\subsection{Benchmark distributions}
-
-Following representative distributions were chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
-
-Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
-
-Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
 
 
-To further challenge our approach we implemented a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
 
-$ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
+\subsection{Benchmark distributions}\label{benchmark_distr}
 
+Following representative distributions are chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
 
-The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
+% Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
 
-The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which have wide support. 
+Two-Gaussians \ref{fig:two-gaussians} is composition of two normal distributions \newline ${\rho(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5)}$, $x \in (-\infty, \infty)$. In this case it is unable to employ just one exponential to capture exact shape of the small peak on the side of the higher one.
+To further challenge our approach we implement a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
+$\rho(x) = \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)}$, $x \in [0, 1]$. 
+The Cauchy distribution $\rho(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in [-20, 20]$ which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
+Due to the further application we also investigate MEM ability to capture lognormal distribution with PDF $\rho(x) = \mathcal{LN}(x|\mu=4.5, \sigma=5.9) \text{, } x \in (0, \infty)$.
 
-Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
-\begin{equation}
-    f(x)=
-    \begin{cases}
-      4/5, & x < 0.3 \text{ or } x > 0.8 \\
-      1, & 0.4 < x < 0.5 \\
-      5/4, & \text{elsewhere.}
-    \end{cases}
- \end{equation}
-  
-Abyss is based on normal distribution
-  \begin{equation}
-    f(x)=
+The Abyss distribution \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture this distribution by polynomials that have wide support. 
+\begin{equation*}
+    \rho(x)=
     \begin{cases}
       0.1, & -0.1 \geq x \leq 0.1 \\   
       \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
     \end{cases}
- \end{equation}
-  
+\end{equation*}
+The last distribution that is called zero-value is considered on the interval $x \in [-1, 1]$ with the following PDF
+\begin{equation*}
+    \rho(x)=
+    \begin{cases}
+      0, & x \leq 0.8 \\   
+      50x-40, & \text{elsewhere.}
+    \end{cases}
+\end{equation*}
+Distributions that do not have an explicitly defined interval on which they are considered are implicitly limited to the interval between quantiles $0.001$ and $0.999$.
 
+% \begin{figure}[htb]
+%     \centering % <-- added
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/two-gaussians_exact.pdf}
+%   \caption{two-gaussians}
+%   \label{fig:two-gaussians}
+% \end{subfigure}\hfil % <-- added
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/five-fingers_exact.pdf}
+%   \caption{five-fingers}
+%   \label{fig:five-fingers}
+% \end{subfigure}\hfil
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/cauchy_exact.pdf}
+%   \caption{Cauchy}
+%   \label{fig:cauchy}
+% \end{subfigure} \hfil% <-- added
+% \centering
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/lognorm_exact.pdf}
+%   \caption{log-normal}
+%   \label{fig:discontinuous}
+% \end{subfigure}\hfil % <-- added
+
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/abyss_exact.pdf}
+%   \caption{abyss}
+%   \label{fig:abyss}
+% \end{subfigure}\hfil
+% \begin{subfigure}{0.5\textwidth}
+%   \includegraphics[width=\linewidth]{benchmark_distributions/rho4.pdf}
+%   \caption{$\rho^4$}
+%   \label{fig:rho4}
+% \end{subfigure}\hfil % <-- added
+% \caption{Approximation error}
+% \label{fig:approx_error}
+% \end{figure}
+% \FloatBarrier
 
 
 
 \begin{figure}[htb]
     \centering % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/norm.pdf}
-  \caption{normal}
-  \label{fig:normal}
-\end{subfigure}\hfil % <-- added
 \begin{subfigure}{0.333\textwidth}
   \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
   \caption{two-gaussians}
@@ -1317,28 +1183,54 @@ Abyss is based on normal distribution
   \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
   \caption{five-fingers}
   \label{fig:five-fingers}
-\end{subfigure}
-
-\medskip
+\end{subfigure}\hfil
 \begin{subfigure}{0.333\textwidth}
   \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
   \caption{Cauchy}
   \label{fig:cauchy}
-\end{subfigure}\hfil % <-- added
+\end{subfigure} % <-- added
+\medskip
 \begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/discontinuous.pdf}
-  \caption{discontinuous}
-  \label{fig:discontinuous}
+  \includegraphics[width=\linewidth]{benchmark_distributions/lognorm.pdf}
+  \caption{lognormal}
+  \label{fig:lognormal}
 \end{subfigure}\hfil % <-- added
 \begin{subfigure}{0.333\textwidth}
   \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
   \caption{abyss}
   \label{fig:abyss}
-\end{subfigure}
+\end{subfigure}\hfil
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/zero_value.pdf}
+  \caption{zero-value}
+  \label{fig:rho4}
+\end{subfigure}\hfil % <-- added
 \caption{Benchmark distributions}
 \label{fig:images}
 \end{figure}
 \FloatBarrier
+  
+
+\begin{figure}[!htb]
+\begin{center} 
+\includegraphics[width=0.75\textwidth]{mu_err_iterations.pdf}
+\end{center} 
+\caption{Convergence of the minimization method with preconditioning, M = $85$.}
+\label{fig:convergence}
+\end{figure} 
+\FloatBarrier
+The figure \ref{fig:convergence} describes the convergence of numerical minimization. Distributions are configured as described in section \ref{benchmarks_distr}. The number of 85 exact moments is utilized. Given our preconditioning (cutting eigenvalues below or equal to zero), the truncation of moments occur in cases of five-fingers ($M=81$) and zero-value ($M=57$) distributions.
+
+\begin{figure}[!htb]
+\begin{center} 
+\includegraphics[width=0.75\textwidth]{mu_err_iterations_no_precond.pdf}
+\end{center} 
+\caption{Convergence of the minimization method without preconditioning, $M = 85$.}
+\label{fig:convergence}
+\end{figure} 
+\FloatBarrier
+\todo{Preconditioning seems to even get worse convergence!?}
+
 
 % \begin{figure}
 %     \centering
@@ -1656,53 +1548,53 @@ The computational costs of Monte Carlo methods are completed in the table~\ref{t
 \FloatBarrier
 
 
-\begin{table}[h]
-    \centering
-    \begin{tabular}{@{} l
-                @{\hspace*{1.5mm}}     c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c|
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c
-                @{\hspace*{\lengthb}}c @{}}
-        \toprule
-        \multirow{2}{*}{$L$} & \multicolumn{6}{c}{$\lambda = 0.1$} & \multicolumn{6}{c}{$\lambda = 0.3$}\\
-        \cmidrule(lr){2-7} \cmidrule(lr){8-13} \\
-        {} & $C_1 N_1$ & $C_2 N_2$  & $C_3 N_3$ & $C_4 N_4$ &$C_5 N_5$ & $C$ & $C_1 N_1$ & $C_2 N_2$  & $C_3 N_3$ & $C_4 N_4$ &$C_5 N_5$ & $C$ &\\
-        \midrule
-        $\mathit{\sigma}=1$ \\
-        1 &918932 &  &  &  &  & 918932              	     &  1133537 &  &  &  &  & 1133537    \\
-        2 & 12537 & 937408 &  &  &  & 949945             	     & 14569 & 1339607 &  &  &  & 1354176  \\
-        3 & 20090 & 44094 & 200505 &  &  & 264689       		 & 15428 & 21891 & 36077 &  &  & 73396\\
-        5 & 24653 & 39048 & 23916 & 39099 & 69471 & 196188     & 17466 & 24546 & 20281 & 9807 & 8815 & 80914    \\
-        
-         \midrule
-        $\mathit{\sigma}=2$ \\
-        1 & 988565 &  &  &  &  & 988565            	     & 1142812 &  &  &  &  & 1142812    \\
-        2 & 13687 & 1365048 &  &  &  & 1378735             	     & 15165 & 1392662 &  &  &  & 1407827  \\
-        3 & 17422 & 38260 & 591138 &  &  & 646820         		 & 19928 & 45796 & 171585 &  &  & 237309  \\
-        5 & 30210 & 46933 & 35236 & 58457 & 94330 & 265167    & 25986 & 42131 & 20333 & 18864 & 31417 & 138731     \\
-        
-         \midrule
-        $\mathit{\sigma}=4$ \\
-        1 & 1215201 &  &  &  &  & 1215201              	     &  1294468 &  &  &  &  & 1294468   \\
-        2 &  15958 & 1987856 &  &  &  & 2003815            	     &  16527 & 1443551 &  &  &  & 1460079 \\
-        3 & 23805 & 86776 & 681878 &  &  & 792459     		 & 28644 & 67778 & 293154 &  &  & 389576    \\
-        5 & 48777 & 111978 & 80789 & 166682 & 316138 & 724365      & 42926 & 53610 & 31584 & 33490 & 54784 & 216393    \\
-        \bottomrule
-    \end{tabular}
-    \caption{Monte Carlo methods computational costs $C_i N_i$ (s) at levels and total cost $C$ (s)}
-    \label{tab:costs}
-\end{table}
-\FloatBarrier
+% \begin{table}[h]
+%     \centering
+%     \begin{tabular}{@{} l
+%                 @{\hspace*{1.5mm}}     c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c|
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c
+%                 @{\hspace*{\lengthb}}c @{}}
+%         \toprule
+%         \multirow{2}{*}{$L$} & \multicolumn{6}{c}{$\lambda = 0.1$} & \multicolumn{6}{c}{$\lambda = 0.3$}\\
+%         \cmidrule(lr){2-7} \cmidrule(lr){8-13} \\
+%         {} & $C_1 N_1$ & $C_2 N_2$  & $C_3 N_3$ & $C_4 N_4$ &$C_5 N_5$ & $C$ & $C_1 N_1$ & $C_2 N_2$  & $C_3 N_3$ & $C_4 N_4$ &$C_5 N_5$ & $C$ &\\
+%         \midrule
+%         $\mathit{\sigma}=1$ \\
+%         1 &918932 &  &  &  &  & 918932              	     &  1133537 &  &  &  &  & 1133537    \\
+%         2 & 12537 & 937408 &  &  &  & 949945             	     & 14569 & 1339607 &  &  &  & 1354176  \\
+%         3 & 20090 & 44094 & 200505 &  &  & 264689       		 & 15428 & 21891 & 36077 &  &  & 73396\\
+%         5 & 24653 & 39048 & 23916 & 39099 & 69471 & 196188     & 17466 & 24546 & 20281 & 9807 & 8815 & 80914    \\
+%         
+%          \midrule
+%         $\mathit{\sigma}=2$ \\
+%         1 & 988565 &  &  &  &  & 988565            	     & 1142812 &  &  &  &  & 1142812    \\
+%         2 & 13687 & 1365048 &  &  &  & 1378735             	     & 15165 & 1392662 &  &  &  & 1407827  \\
+%         3 & 17422 & 38260 & 591138 &  &  & 646820         		 & 19928 & 45796 & 171585 &  &  & 237309  \\
+%         5 & 30210 & 46933 & 35236 & 58457 & 94330 & 265167    & 25986 & 42131 & 20333 & 18864 & 31417 & 138731     \\
+%         
+%          \midrule
+%         $\mathit{\sigma}=4$ \\
+%         1 & 1215201 &  &  &  &  & 1215201              	     &  1294468 &  &  &  &  & 1294468   \\
+%         2 &  15958 & 1987856 &  &  &  & 2003815            	     &  16527 & 1443551 &  &  &  & 1460079 \\
+%         3 & 23805 & 86776 & 681878 &  &  & 792459     		 & 28644 & 67778 & 293154 &  &  & 389576    \\
+%         5 & 48777 & 111978 & 80789 & 166682 & 316138 & 724365      & 42926 & 53610 & 31584 & 33490 & 54784 & 216393    \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{Monte Carlo methods computational costs $C_i N_i$ (s) at levels and total cost $C$ (s)}
+%     \label{tab:costs}
+% \end{table}
+% \FloatBarrier
 
 
 \subsection{MLMC sampling algorithm}
