@@ -19,6 +19,7 @@
 \usepackage{MnSymbol}
 \usepackage[scientific-notation=true]{siunitx}
 \usepackage{booktabs}
+\usepackage{xcolor}
 
 \def\d{\,{\rm d}}               % differential
 \def\vc#1{\mathbf{\boldsymbol{#1}}}     % vector
@@ -56,7 +57,7 @@
 \newlength\lengtha \setlength\lengtha{2mm} % table spacing
 
 
-\title{Density Estimation by \\Precondictioned Multilevel Monte Carlo
+\title{PDF Estimation by \\Precondictioned Multilevel Monte Carlo
 Maximal Entropy metod}
 \author{Jan Březina, Martin Špetlík}
 \date{2021}
@@ -93,6 +94,7 @@ Possible outcomes:
 \end{itemize}
 
 \section{Multilevel Monte Carlo method}
+\jb{JB TODO: zkratit, reference}
 In this section, we shall introduce the MLMC estimator and consider its application to a random variable based on a solution to a PDE.
 Let $(\Omega, \Sigma, P)$ be a probability space and $X(\omega)$ be a random variable
 that can not be sampled exactly, but we are able to sample its approximation $X^h(\omega)$. 
@@ -144,8 +146,10 @@ The level variances $V_l$ can be estimated using the standard unbiased estimator
 
 \subsection{Aplication to finite element solutions}
 \todo{Very preliminary, make it more precise. Refer to other applied papers.}
+\jb{JB TODO: zvazit, pripadne upravit jako priklad pro ulohu proudeni, uvest teoreticke odhady pro urovnove rozptyly, kouknout jak to jiz bylo udelano, zajimave by to bylo v kombinaci s momenty a teoretickym oduvodnenim shody prvnich dvou rozptylu. 
+Nicméně nevidím teoretický důvod proč by k tomu mělo docházet, rozptyl na první úrovni by mohl být prakticky libovolný, takže shoda může být specifikum úlohy.}
 In particular we are interested in the case $X=F(u)$, where $F$ is a functional representing an observation of
-the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=0,\dots,L$ \todo{Shouldn't $l$ be from $1$? } is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
+the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=1,\dots,L$ \todo{Shouldn't $l$ be from $1$? } is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
 $W^* \subset W$, $u_h$ from $W_{h_l} \subset W$ and assume the usual error estimate in the form:
 \[
 	\norm{u - u_h}_{W} \le h^s \norm{u}_{W^*}
@@ -180,6 +184,7 @@ and the total cost bounded as $C < c \epsilon^{-2}$.
 
 
 \subsection{Optimal choice of number of samples}
+\
 Efficiency of the MLMC estimator \eqref{eq:mlmc_est} depends on the optimal choice of the sample vector $\vc N$. Basic analysis was done by Giles in \cite{Giles2008} and \cite{Giles2015}. In this section we report the formulas \eqref{eq:opt_n_for_var} \eqref{eq:opt_n_for_cost} for optimal $\vc N$ in the case of given target variance $V$ or in the case of target cost $C$ respectively. Further, we propose a slight modification suitable for practical usage.
 
 Let  the level variances $V_l$ be given and let us denote $C_l$ the computational cost of a single sample of the difference $\Delta X^l$ at the level $l=1,\dots, L$. For a given target variance $V$ (c.f. \eqref{eq:var_mlmc}), we want to minimize the total cost
@@ -216,149 +221,144 @@ for given target variance $V=\epsilon^2$. Similarly, $V \le S^2 / C$ for given t
 
 Formulas \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are based on the knowledge of the level variances $V_l$ and computational costs $C_l$ which are usually not known and must be estimated (see Section \ref{sec:VarEst}). These small errors lead to large changes in the optimal sample vector since related minimized functionals are quite flat at the optimal point.  This often results in overestimating the number of samples, especially on lower levels. To mitigate this problem we rather use
 \[
-	N_l^{V*} = \min( N_l^V, \frac{V_l L}{V} )
+	N_l^{V*} = \min( N_l^V, \frac{V_l L}{V} ), \text{ and }
+	N_l^{C*} = \min( N_l^C, \frac{C}{C_l L} ).
 \]
-for prescribed total variance $V$ and
-\[
-	N_l^{C*} = \min( N_l^C, \frac{C}{C_l L} )
-\]
-in the case of fixed cost $C$. This modification increase the total variance or total cost at most by $V$ and $C$ respectively, while keeping  $N_l$ reasonable. Indeed, let
-\[
-	N_l^{V*} = \frac{V_l L}{V} < N_l^V 
-\]
-happen for a single level $l$, then an increase in the total variance is
-\[
-    V^* - V = \frac{V}{L} - \frac{V_l}{N_l^V} \le \frac{V}{L}
-\]
-and similarly for $N_l^{C*}$.
-
+for prescribed variance $V$ and cost $C$, respectively. This modification increase the total variance or total cost at most by factor $2$, while keeping  $N_l$ reasonable. 
 
 
 \subsection{Estimate level variances and costs}\label{est_var_cost}
-\label{sec:VarEst}
-As the exact values for $V_l$ and $C_l$ in \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are not available they are estimated from initial fraction of the samples. In particular $V_l$ is estimated by standard unbiased variance estimater $\widehat V_l$ and $C_l$ by a mean of times of collected samples 
-$\widehat C_l$. Error of these estimates can be quite large especially on higher levels. 
-
-
-
-In order to make MLMC algorithm fully automatic, we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather set up a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover, we also combine data for different moments.
-
-
-Using the approximation:
-\[
- \log \widehat V_l = \log V_l + \epsilon + O(\epsilon^2), \quad \epsilon = \frac{\widehat V_l - V_l}{V_l}
-\]
-we obtain an approximation for its variance as:
-\[
-   \Var(\log \widehat V_l) = \Var\left[ \frac{\sum_{i=1}^{N_l} Y_i^2}{N_l -1}\right]  \approx \frac{1}{N-1}
-\]
-for some standardized i.i.d. samples $Y_i$.
-
-Under the assumption, that regression model $lm(\vc \alpha)$ fits well we have 
-\[
- 1 = (N-1) \Var[log \widehat V] = \E[ (\log \widehat V - lm(\alpha))^2 (N-1) ] 
-\]
-
-
-\[
-  W_l = \sqrt{N_l-1}*(\log \widehat V_l - lm(\widehat{\vc\alpha}))
-\]  
-  is approximately $N(0,1)$. We use test for variance and possibly 
-reduce the number of levels used for regression. If
-\[
-  \sum_l W_l^2 > \chi^2_{N-1}(1-\alpha). 
-\]
-we reject hypothesis of the good fit.
-\todo{Move variance approximation to notes since we need more testing}
-Remarks:
-\begin{itemize}
- \item Empirically, for the Flow problem, 9 level, for quadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw variances.
- \item The hypothesis testing doesn't work. Even if it holds that $W_l$ is approximately $N(0,1)$.
- We obtain much higher values for the statistics. Further it depends on number of moments and number of used levels. 
- \item It behaves like it have much greater variance then 1, since $W_l^2$ values corresponds always to the p-values close to 1, which corresponds to big error of the fit.
- \item Questionable how it may work for smaller number of levels.
- \item Must also be tested for different simulations.
-\end{itemize}
-
-
-
-
-Let us assume that the level difference $Z_l^r = X_l^r - X^r_{l-l}$ for level $l=1,\dots L$ and a moment $r$ is normally distributed 
-with mean estimate $\hat{Z}_l^r$ and variance estimate $V_l^r$ is
-$$
-W_l^r = \sum_{i} (Z^r_{l,i} - \hat{Z}_l^r)^2 / (n_l - 1).
-$$
-
-Where $Y_l = (n_l -1)W_l^r/V_l^r$ have distribution $\chi^2_{n_l -1}$.
-
-We assume a simple model:
-$$
-  U_l^r = \log W_l^r =  \alpha_r + \beta \log h_l + \gamma (\log h_l)^2.
-$$
-where $h_l$ is a mesh step on level $l$ and $\alpha_r$, $\beta$ are parameters. 
-For the variance of $U_l^r$ we have:
-$$
-  \D U_l^r = \D \log \Big( \frac{Y_l V_l^r}{n_l - 1} \Big) = \D \log (Y_l/N_l) = \epsilon_l
-$$
-with $N_l = n_l - 1$.
-
-Then we estimate model parameters $\alpha_r$, $\beta$ from the least squares problem:
-$$
-    \tn{X}^T \tn{D}^2 \tn{X} \vc{b} = \tn{X}^T \tn{D} \vc{U},
-    \ D_{i,i} = 1/\epsilon_{l}.
-$$
-
-Values of $\epsilon_l$ as a function of $l$ will be determined by MC. Note also that using the 
-\href{https://www.researchgate.net/post/How_can_I_obtain_the_PDF_of_the_logarithm_of_a_chi-squared_random_variable}{transformation} we obtain PDF of $\epsilon_l$ as:
-
-$$
-    f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
-$$
-For small values of $N_l$ we compute $\D \epsilon_l$ using numerical quadrature. For sufficiently large $N_l$ we approximate $\chi^2$ by normal distribution:
-$$
-    f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
-$$
-
-\begin{figure}
- \includegraphics[width=0.55\textwidth]{bs_var_var_20.pdf}
- \hspace{-0.1\textwidth}
- \includegraphics[width=0.55\textwidth]{bs_var_var_Nl.pdf}
- \caption{Estimate of error of estimators for $V^r$, $V_l^r$. Left figure demonstrate independece on level, right figure independence on $N_l$. Bootstrapping use 300 samples.}
- \label{fig:bs_var_var}
-\end{figure}
-
-\begin{figure}
- \includegraphics[width=0.55\textwidth]{bs_var_var_composition.pdf}
- \caption{BS estimate of the MSE of the variance estimate and its dropdown to individual levels. Realistic sample vector for a target variance $1e-4$.}
- \label{fig:bs_var_var_comp}
-\end{figure}
-
-
-\subsubsection{Uvahy}
-Cilem je ziskat odhad rozptylu MLMC estimatoru, tak aby skutecny rozptyl byl mensi s danou pravdepodobnosti. 
-
-Notes:
-\begin{itemize}
-    \item Variance $W_l$ of the level variance estimator is:
-    \[
-        Var \hat\sigma_l^2 \approx \hat\sigma_l^2 \frac{2}{N_l - 1}
-    \]
-    \dots assuming
-    \[
-    Z_l = \sum_{i=1}^{n_l}\Big(\frac{\Delta X^l_i}{\sigma_l}\Big)^2
-    \]
-    be approximately $\chi^2_k$ with $k=n_l$. This corresponds to the assumption that level differences $\Delta X_l$ have normal distribution. 
-    \item At least for flow test case it seems that higher moments have smaller $W_l$ then first few (up to 10) moments. The differences in $W_l$ for individual moments are about one order of magnitude.  This effect is more pronounced for levels with many samples so it seems to be real. Differences between levels are also about one order of magnitude.
-    \item These observations are not in contradiction with approximation of variance of  $\log W_l$.
-\end{itemize}
-
+\jb{important, promissing and interesting, however postponed as very preliminary}
+% \label{sec:VarEst}
+% As the exact values for $V_l$ and $C_l$ in \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are not available they are estimated from initial fraction of the samples. In particular $V_l$ is estimated by standard unbiased variance estimater $\widehat V_l$ and $C_l$ by a mean of times of collected samples 
+% $\widehat C_l$. Error of these estimates can be quite large especially on higher levels. 
+% 
+% 
+% 
+% In order to make MLMC algorithm fully automatic, we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather set up a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover, we also combine data for different moments.
+% 
+% 
+% Using the approximation:
+% \[
+%  \log \widehat V_l = \log V_l + \epsilon + O(\epsilon^2), \quad \epsilon = \frac{\widehat V_l - V_l}{V_l}
+% \]
+% we obtain an approximation for its variance as:
+% \[
+%    \Var(\log \widehat V_l) = \Var\left[ \frac{\sum_{i=1}^{N_l} Y_i^2}{N_l -1}\right]  \approx \frac{1}{N-1}
+% \]
+% for some standardized i.i.d. samples $Y_i$.
+% 
+% Under the assumption, that regression model $lm(\vc \alpha)$ fits well we have 
+% \[
+%  1 = (N-1) \Var[log \widehat V] = \E[ (\log \widehat V - lm(\alpha))^2 (N-1) ] 
+% \]
+% 
+% 
+% \[
+%   W_l = \sqrt{N_l-1}*(\log \widehat V_l - lm(\widehat{\vc\alpha}))
+% \]  
+%   is approximately $N(0,1)$. We use test for variance and possibly 
+% reduce the number of levels used for regression. If
+% \[
+%   \sum_l W_l^2 > \chi^2_{N-1}(1-\alpha). 
+% \]
+% we reject hypothesis of the good fit.
+% \todo{Move variance approximation to notes since we need more testing}
+% Remarks:
+% \begin{itemize}
+%  \item Empirically, for the Flow problem, 9 level, for quadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw variances.
+%  \item The hypothesis testing doesn't work. Even if it holds that $W_l$ is approximately $N(0,1)$.
+%  We obtain much higher values for the statistics. Further it depends on number of moments and number of used levels. 
+%  \item It behaves like it have much greater variance then 1, since $W_l^2$ values corresponds always to the p-values close to 1, which corresponds to big error of the fit.
+%  \item Questionable how it may work for smaller number of levels.
+%  \item Must also be tested for different simulations.
+% \end{itemize}
+% 
+% 
+% 
+% 
+% Let us assume that the level difference $Z_l^r = X_l^r - X^r_{l-l}$ for level $l=1,\dots L$ and a moment $r$ is normally distributed 
+% with mean estimate $\hat{Z}_l^r$ and variance estimate $V_l^r$ is
+% $$
+% W_l^r = \sum_{i} (Z^r_{l,i} - \hat{Z}_l^r)^2 / (n_l - 1).
+% $$
+% 
+% Where $Y_l = (n_l -1)W_l^r/V_l^r$ have distribution $\chi^2_{n_l -1}$.
+% 
+% We assume a simple model:
+% $$
+%   U_l^r = \log W_l^r =  \alpha_r + \beta \log h_l + \gamma (\log h_l)^2.
+% $$
+% where $h_l$ is a mesh step on level $l$ and $\alpha_r$, $\beta$ are parameters. 
+% For the variance of $U_l^r$ we have:
+% $$
+%   \D U_l^r = \D \log \Big( \frac{Y_l V_l^r}{n_l - 1} \Big) = \D \log (Y_l/N_l) = \epsilon_l
+% $$
+% with $N_l = n_l - 1$.
+% 
+% Then we estimate model parameters $\alpha_r$, $\beta$ from the least squares problem:
+% $$
+%     \tn{X}^T \tn{D}^2 \tn{X} \vc{b} = \tn{X}^T \tn{D} \vc{U},
+%     \ D_{i,i} = 1/\epsilon_{l}.
+% $$
+% 
+% Values of $\epsilon_l$ as a function of $l$ will be determined by MC. Note also that using the 
+% \href{https://www.researchgate.net/post/How_can_I_obtain_the_PDF_of_the_logarithm_of_a_chi-squared_random_variable}{transformation} we obtain PDF of $\epsilon_l$ as:
+% 
+% $$
+%     f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
+% $$
+% For small values of $N_l$ we compute $\D \epsilon_l$ using numerical quadrature. For sufficiently large $N_l$ we approximate $\chi^2$ by normal distribution:
+% $$
+%     f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
+% $$
+% 
+% \begin{figure}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_20.pdf}
+%  \hspace{-0.1\textwidth}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_Nl.pdf}
+%  \caption{Estimate of error of estimators for $V^r$, $V_l^r$. Left figure demonstrate independece on level, right figure independence on $N_l$. Bootstrapping use 300 samples.}
+%  \label{fig:bs_var_var}
+% \end{figure}
+% 
+% \begin{figure}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_composition.pdf}
+%  \caption{BS estimate of the MSE of the variance estimate and its dropdown to individual levels. Realistic sample vector for a target variance $1e-4$.}
+%  \label{fig:bs_var_var_comp}
+% \end{figure}
+% 
+% 
+% \subsubsection{Uvahy}
+% Cilem je ziskat odhad rozptylu MLMC estimatoru, tak aby skutecny rozptyl byl mensi s danou pravdepodobnosti. 
+% 
+% Notes:
+% \begin{itemize}
+%     \item Variance $W_l$ of the level variance estimator is:
+%     \[
+%         Var \hat\sigma_l^2 \approx \hat\sigma_l^2 \frac{2}{N_l - 1}
+%     \]
+%     \dots assuming
+%     \[
+%     Z_l = \sum_{i=1}^{n_l}\Big(\frac{\Delta X^l_i}{\sigma_l}\Big)^2
+%     \]
+%     be approximately $\chi^2_k$ with $k=n_l$. This corresponds to the assumption that level differences $\Delta X_l$ have normal distribution. 
+%     \item At least for flow test case it seems that higher moments have smaller $W_l$ then first few (up to 10) moments. The differences in $W_l$ for individual moments are about one order of magnitude.  This effect is more pronounced for levels with many samples so it seems to be real. Differences between levels are also about one order of magnitude.
+%     \item These observations are not in contradiction with approximation of variance of  $\log W_l$.
+% \end{itemize}
+% 
 
 \section{Maximal Entropy method}\label{mem}
 
-The MLMC estimator \eqref{eq:mlmc_est} can be applied to estimate any generalized moment $\E[\phi(X)]$ 
-of the random variable $X$ using the same set of random samples. Taking a suitable 
-set of such moments it is possible to construct an approximation to the PDF of $X$. This section first
-summarizes the Maximal Entropy method and related theoretical results slightly simplifying proofs from \cite{Barron1991}. Later we provide a natural selection of the polynomial basis based on the estimate of the covariance matrix. We show that this choice significantly improves the convergence of the related optimization problem.
+The MLMC estimator \eqref{eq:mlmc_est} can estimate a generalized moment $\E[\phi(X)]$ 
+for any function $\phi$ for which the expectation is finite, i.e. 
+$\phi \in L^1(\rho_X)$.
+The same set of random samples can be used for estimation of moments for various functions $\phi$. Then we can find a probability density function with the same moments.
+As this inverse problem is under-determined, the PDF with maximal Shanon's entropy is selected. This Maximal Entropy method (see \cite{}) is summarized in Section 
+\ref{}. Reconstructed probability density is subjected to the approxiamtion error 
+of the moment function space and to the estimation error of the moment values. Both were first estimated by \cite{Barron1991} and recently applied to MLMC by \cite{Chernov}. 
+However these estimates are practical only for strictly positive densities. 
+
+This section first summarizes the Maximal Entropy method and provides error estimates  practical slightly simplifying proofs from . Later we provide a natural selection of the polynomial basis based on the estimate of the covariance matrix. We show that this choice significantly improves the convergence of the related optimization problem.
 
 Let $X$ be a continuous random variable with density function $\rho$ that have bounded support
 $supp(\rho) \subset \Omega$ for a finite interval $\Omega \subset \R$. Further consider generalized moments
@@ -476,6 +476,7 @@ Due to \eqref{eq:moment_system} it holds $\E_{\rho}[\vphi] = \E_{\rho_{\vl}}[\vp
 The first term on the right side of \eqref{eq:decomposition} corresponds to the approximation error of the family $\mathcal F_p$ while the second term with $\estvl = \estvl(\estvmu)$ represents the error due to the moment estimation. 
 
 \subsection{Approximation error}
+\jb{toto je jen prepis Barrona, bud jen ocitovat, nebo odvodit lepsi odhad. Je totiz pravda, ze ten odhad je velmi suboptimalni. Ve skutecnosti plati i pro hustoty ktere jsou nekde nulove a asi i pro vhodny rust od nuly.}
 Following estimates are based on \cite[Lemma 2]{Barron1991} 
 \begin{lemma} 
   \begin{equation}
@@ -488,7 +489,7 @@ Following estimates are based on \cite[Lemma 2]{Barron1991}
       \label{eq:l1_estimate}
       D(p\Vert q) \le \frac{1}{2}\norm{\log p/ q}^2_{L^2_p} + \norm{\log p/ q}_{L^1_p}
   \end{equation}
- for any constant $c$.
+ for any constant $c$. \jb{Jak se dostane druha nerovnost? Asi ne z \cite[Lemma 2]{Barron1991}}.
 \end{lemma}
 
 Then for the approximation error, we have:
@@ -528,96 +529,23 @@ Applying \eqref{eq:l2_estimate} with $c = \log p - \psi$, we obtain:
   \le \frac{\abs{\Omega}}{2} e^{\epsilon} \epsilon^2.
 \]
 \end{proof}
-For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can directly apply results form \cite[Section 7]{Barron1991}. For a $\rho \in W^r_2(\Omega)$:
+For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can directly apply results form \cite[Section 7]{Barron1991}. For a $\log\rho \in W^r_2(\Omega)$:
 \[
-    \epsilon_{m,\infty}(\rho) \le C \left(\frac{1}{m}\right)^{r-1} \norm{\rho}_{W^r_2},
+    \epsilon_{m,\infty}(\rho) \le C \left(\frac{1}{m}\right)^{r-1} \norm{\log\rho}_{W^r_2},
 \]
 \[
-    \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\rho}_{W^r_2}.
+    \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\log\rho}_{W^r_2}.
 \]
 
-\subsection{Benchmark distributions}
-
-Following representative distributions were chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
-
-Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
-
-Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
-
-
-To further challenge our approach we implemented a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
-
-$ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
-
-
-The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
-
-The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which have wide support. 
-
-Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
-\begin{equation}
-    f(x)=
-    \begin{cases}
-      4/5, & x < 0.3 \text{ or } x > 0.8 \\
-      1, & 0.4 < x < 0.5 \\
-      5/4, & \text{elsewhere.}
-    \end{cases}
- \end{equation}
-  
-Abyss is based on normal distribution
-  \begin{equation}
-    f(x)=
-    \begin{cases}
-      0.1, & -0.1 \geq x \leq 0.1 \\   
-      \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
-    \end{cases}
- \end{equation}
-  
-
-
-
-
-\begin{figure}[htb]
-    \centering % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/norm.pdf}
-  \caption{normal}
-  \label{fig:normal}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
-  \caption{two-gaussians}
-  \label{fig:two-gaussians}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
-  \caption{five-fingers}
-  \label{fig:five-fingers}
-\end{subfigure}
-
-\medskip
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
-  \caption{Cauchy}
-  \label{fig:cauchy}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/discontinuous.pdf}
-  \caption{discontinuous}
-  \label{fig:discontinuous}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
-  \caption{abyss}
-  \label{fig:abyss}
-\end{subfigure}
-\caption{Benchmark distributions}
-\label{fig:images}
-\end{figure}
-\FloatBarrier
 
 
 \subsection{Estimation error}
+\jb{JB TODO:
+
+- finish contra-examples
+- tests for zero valued PDFs
+- modify test plots
+- present only result for the mean Hassian matrix}
 We start with a sensitivity estimate for the nonlinear system \eqref{eq:moment_system}.
 
 \begin{lemma}
@@ -634,6 +562,8 @@ where $\alpha_0$ is the smallest eigenvalue of the Hessian matrix $\tn H(\estvl)
 \begin{proof}
 Unfortunately we are yet unable to proof this result. So we try some numerical tests.
 
+\jb{TODO JB: move figure and discussion to numerical part}
+\jb{What is purpose of depicting TV of the difference?}
 Based on numerical experiments, we try to show that the relation \ref{eq:lambda_mu} holds true for all our benchmark distributions. $M=25$ was utilized.
  The results are depicted in the picture \ref{fig:lambda_kl_tv}. In graphic terms, the formula \ref{eq:lambda_mu} is valid if all red dots with coordinates ($|\vmu - \estvmu|, \alpha_{0}|\vl - \estvl|$) are on or below the black line. The line represents the axis of the first quadrant. 
 
@@ -646,6 +576,7 @@ The data for the six benchmark distributions suggest the validity of lemma \ref{
 \caption{Estimation error}
 \label{fig:lambda_kl_tv}
 \end{figure} 
+
 
 Further numerical tests confirms that the eigenvalues of the Hessian $\tn H(\estvl)$ are usually close to one. And smallest eigenvalue seems to increase as $\estvl$ tends to $\vl$. 
 $\tn H(\estvl)$ should be very close to one, but it is not the case for some test distributions, but the limit value is somewhat smaller. Possibly that could be caused by insufficient normalization. 
@@ -952,7 +883,7 @@ Similarly as in \cite[Theorem 3]{Barron1991} we
 Cite estimates for $D(\rho\Vert\rho_{\lambda})$.
 
 Modify estimates for $D(\rho\Vert\rho_{\lambda})$ using $q=p$ and
-approximation of $Cov_p \vc phi$ for Legendere polynoms $\vc\phi$.
+approximation of $Cov_p \vcphi$ for Legendere polynoms $\vc\phi$.
 
 Probabilistic result $D(\rho_{\lambda*} \Vert \rho_{\lambda}) < V/p$
 with probability at least $1-p$, where 
@@ -1234,6 +1165,92 @@ The spectral methods sample the field by its Fourier Second kind of methods use 
 
 
 \section{Numerical experiments}
+\jb{TODO: present to kind of tests: \\
+
+MEM benchmarks for artificial distributions, without MLMC but dealing with noise in moments, validation of theory
+
+Homogenization of flow through square, MLMC + MEM, focus on level variances of a real problem of interest and performance of MLMC MEM as whole}
+
+\subsection{Benchmark distributions}
+
+Following representative distributions were chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
+
+Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
+
+Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
+
+
+To further challenge our approach we implemented a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
+
+$ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
+
+
+The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
+
+The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which have wide support. 
+
+Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
+\begin{equation}
+    f(x)=
+    \begin{cases}
+      4/5, & x < 0.3 \text{ or } x > 0.8 \\
+      1, & 0.4 < x < 0.5 \\
+      5/4, & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+Abyss is based on normal distribution
+  \begin{equation}
+    f(x)=
+    \begin{cases}
+      0.1, & -0.1 \geq x \leq 0.1 \\   
+      \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+
+
+
+
+\begin{figure}[htb]
+    \centering % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/norm.pdf}
+  \caption{normal}
+  \label{fig:normal}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
+  \caption{two-gaussians}
+  \label{fig:two-gaussians}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
+  \caption{five-fingers}
+  \label{fig:five-fingers}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
+  \caption{Cauchy}
+  \label{fig:cauchy}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/discontinuous.pdf}
+  \caption{discontinuous}
+  \label{fig:discontinuous}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
+  \caption{abyss}
+  \label{fig:abyss}
+\end{subfigure}
+\caption{Benchmark distributions}
+\label{fig:images}
+\end{figure}
+\FloatBarrier
+
 % \begin{figure}
 %     \centering
 %     \includegraphics[width=\textwidth]{01_cond_pdf_cdf.pdf}
