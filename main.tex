@@ -19,6 +19,7 @@
 \usepackage{MnSymbol}
 \usepackage[scientific-notation=true]{siunitx}
 \usepackage{booktabs}
+\usepackage{xcolor}
 
 \def\d{\,{\rm d}}               % differential
 \def\vc#1{\mathbf{\boldsymbol{#1}}}     % vector
@@ -49,13 +50,17 @@
 \def\estvmu{{\vc{\hat\mu}}}
 \def\vphi{\vc\phi}
 
+\newcommand{\ms}[1]{{\color{red}#1}}  % Matrin Špetlík
+\newcommand{\jb}[1]{{\color{violet}#1}}  % Jan Brezina
+
+
 \newlength\lengtha \setlength\lengtha{2mm} % table spacing
-\newlength\lengthb \setlength\lengthb{0.5mm} % table spacing
 
-\title{Robust Density Estimation Using Maximal Entropy Multilevel Monte Carlo method. }
-\author{jan.brezina }
-\date{September 2018}
 
+\title{PDF Estimation by \\Precondictioned Multilevel Monte Carlo
+Maximal Entropy metod}
+\author{Jan Březina, Martin Špetlík}
+\date{2021}
 
 \begin{document}
 
@@ -82,13 +87,14 @@ Elliptic eq. with log normal coefficients \cite{Graham2015}
 
 Possible outcomes:
 \begin{itemize}
-    \item Research for suitable statistical models for complex hydrology problems (porosity, conductivity, dispersion, fracture opening, fracture density, ... dependency on the length scale).
-    \item Demonstrate efficiency of MLMC for estimation various moments of relevant quantities of interest.
-    \item Demonstrate efficient generation of samples for various types of correlations.
-    \item Demonstrate reconstruction of the density function.
+    \item Practical estimates of the KL-divergence error by the moments error.
+    \item Preconditioning via Covariance matrix estimation.
+    \item Tests on synthetic densities.
+    \item Test on PDE problem.
 \end{itemize}
 
 \section{Multilevel Monte Carlo method}
+\jb{JB TODO: zkratit, reference}
 In this section, we shall introduce the MLMC estimator and consider its application to a random variable based on a solution to a PDE.
 Let $(\Omega, \Sigma, P)$ be a probability space and $X(\omega)$ be a random variable
 that can not be sampled exactly, but we are able to sample its approximation $X^h(\omega)$. 
@@ -140,8 +146,10 @@ The level variances $V_l$ can be estimated using the standard unbiased estimator
 
 \subsection{Aplication to finite element solutions}
 \todo{Very preliminary, make it more precise. Refer to other applied papers.}
+\jb{JB TODO: zvazit, pripadne upravit jako priklad pro ulohu proudeni, uvest teoreticke odhady pro urovnove rozptyly, kouknout jak to jiz bylo udelano, zajimave by to bylo v kombinaci s momenty a teoretickym oduvodnenim shody prvnich dvou rozptylu. 
+Nicméně nevidím teoretický důvod proč by k tomu mělo docházet, rozptyl na první úrovni by mohl být prakticky libovolný, takže shoda může být specifikum úlohy.}
 In particular we are interested in the case $X=F(u)$, where $F$ is a functional representing an observation of
-the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=0,\dots,L$ \todo{Shouldn't $l$ be from $1$? } is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
+the solution $u$ to a PDE with some random data $d(\omega)$. The approximation $X^l = F(u^{h_l})$, $l=1,\dots,L$ \todo{Shouldn't $l$ be from $1$? } is the same observation performed for an approximate solution $u^{h_l}$ computed on a mesh with the maximal element size $h_l$. Further on we assume $h_l = 2^{-\alpha l}$. Let $u$ be from a suitable space 
 $W^* \subset W$, $u_h$ from $W_{h_l} \subset W$ and assume the usual error estimate in the form:
 \[
 	\norm{u - u_h}_{W} \le h^s \norm{u}_{W^*}
@@ -176,6 +184,7 @@ and the total cost bounded as $C < c \epsilon^{-2}$.
 
 
 \subsection{Optimal choice of number of samples}
+\
 Efficiency of the MLMC estimator \eqref{eq:mlmc_est} depends on the optimal choice of the sample vector $\vc N$. Basic analysis was done by Giles in \cite{Giles2008} and \cite{Giles2015}. In this section we report the formulas \eqref{eq:opt_n_for_var} \eqref{eq:opt_n_for_cost} for optimal $\vc N$ in the case of given target variance $V$ or in the case of target cost $C$ respectively. Further, we propose a slight modification suitable for practical usage.
 
 Let  the level variances $V_l$ be given and let us denote $C_l$ the computational cost of a single sample of the difference $\Delta X^l$ at the level $l=1,\dots, L$. For a given target variance $V$ (c.f. \eqref{eq:var_mlmc}), we want to minimize the total cost
@@ -212,147 +221,144 @@ for given target variance $V=\epsilon^2$. Similarly, $V \le S^2 / C$ for given t
 
 Formulas \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are based on the knowledge of the level variances $V_l$ and computational costs $C_l$ which are usually not known and must be estimated (see Section \ref{sec:VarEst}). These small errors lead to large changes in the optimal sample vector since related minimized functionals are quite flat at the optimal point.  This often results in overestimating the number of samples, especially on lower levels. To mitigate this problem we rather use
 \[
-	N_l^{V*} = \min( N_l^V, \frac{V_l L}{V} )
+	N_l^{V*} = \min( N_l^V, \frac{V_l L}{V} ), \text{ and }
+	N_l^{C*} = \min( N_l^C, \frac{C}{C_l L} ).
 \]
-for prescribed total variance $V$ and
-\[
-	N_l^{C*} = \min( N_l^C, \frac{C}{C_l L} )
-\]
-in the case of fixed cost $C$. This modification increase the total variance or total cost at most by $V$ and $C$ respectively, while keeping  $N_l$ reasonable. Indeed, let
-\[
-	N_l^{V*} = \frac{V_l L}{V} < N_l^V 
-\]
-happen for a single level $l$, then an increase in the total variance is
-\[
-    V^* - V = \frac{V}{L} - \frac{V_l}{N_l^V} \le \frac{V}{L}
-\]
-and similarly for $N_l^{C*}$.
-
+for prescribed variance $V$ and cost $C$, respectively. This modification increase the total variance or total cost at most by factor $2$, while keeping  $N_l$ reasonable. 
 
 
 \subsection{Estimate level variances and costs}\label{est_var_cost}
-\label{sec:VarEst}
-As the exact values for $V_l$ and $C_l$ in \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are not available they are estimated from initial fraction of the samples. In particular $V_l$ is estimated by standard unbiased variance estimater $\widehat V_l$ and $C_l$ by a mean of times of collected samples 
-$\widehat C_l$. Error of these estimates can be quite large especially on higher levels. 
-
-
-
-In order to make MLMC algorithm fully automatic, we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather set up a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover, we also combine data for different moments.
-
-
-Using the approximation:
-\[
- \log \widehat V_l = \log V_l + \epsilon + O(\epsilon^2), \quad \epsilon = \frac{\widehat V_l - V_l}{V_l}
-\]
-we obtain an approximation for its variance as:
-\[
-   \Var(\log \widehat V_l) = \Var\left[ \frac{\sum_{i=1}^{N_l} Y_i^2}{N_l -1}\right]  \approx \frac{1}{N-1}
-\]
-for some standardized i.i.d. samples $Y_i$.
-
-Under the assumption, that regression model $lm(\vc \alpha)$ fits well we have 
-\[
- 1 = (N-1) \Var[log \widehat V] = \E[ (\log \widehat V - lm(\alpha))^2 (N-1) ] 
-\]
-
-
-\[
-  W_l = \sqrt{N_l-1}*(\log \widehat V_l - lm(\widehat{\vc\alpha}))
-\]  
-  is approximately $N(0,1)$. We use test for variance and possibly 
-reduce the number of levels used for regression. If
-\[
-  \sum_l W_l^2 > \chi^2_{N-1}(1-\alpha). 
-\]
-we reject hypothesis of the good fit.
-\todo{Move variance approximation to notes since we need more testing}
-Remarks:
-\begin{itemize}
- \item Empirically, for the Flow problem, 9 level, for quadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw variances.
- \item The hypothesis testing doesn't work. Even if it holds that $W_l$ is approximately $N(0,1)$.
- We obtain much higher values for the statistics. Further it depends on number of moments and number of used levels. 
- \item It behaves like it have much greater variance then 1, since $W_l^2$ values corresponds always to the p-values close to 1, which corresponds to big error of the fit.
- \item Questionable how it may work for smaller number of levels.
- \item Must also be tested for different simulations.
-\end{itemize}
-
-
-
-
-Let us assume that the level difference $Z_l^r = X_l^r - X^r_{l-l}$ for level $l=1,\dots L$ and a moment $r$ is normally distributed 
-with mean estimate $\hat{Z}_l^r$ and variance estimate $V_l^r$ is
-$$
-W_l^r = \sum_{i} (Z^r_{l,i} - \hat{Z}_l^r)^2 / (n_l - 1).
-$$
-
-Where $Y_l = (n_l -1)W_l^r/V_l^r$ have distribution $\chi^2_{n_l -1}$.
-
-We assume a simple model:
-$$
-  U_l^r = \log W_l^r =  \alpha_r + \beta \log h_l + \gamma (\log h_l)^2.
-$$
-where $h_l$ is a mesh step on level $l$ and $\alpha_r$, $\beta$ are parameters. 
-For the variance of $U_l^r$ we have:
-$$
-  \D U_l^r = \D \log \Big( \frac{Y_l V_l^r}{n_l - 1} \Big) = \D \log (Y_l/N_l) = \epsilon_l
-$$
-with $N_l = n_l - 1$.
-
-Then we estimate model parameters $\alpha_r$, $\beta$ from the least squares problem:
-$$
-    \tn{X}^T \tn{D}^2 \tn{X} \vc{b} = \tn{X}^T \tn{D} \vc{U},
-    \ D_{i,i} = 1/\epsilon_{l}.
-$$
-
-Values of $\epsilon_l$ as a function of $l$ will be determined by MC. Note also that using the \href{https://en.wikipedia.org/wiki/Probability_density_function#Dependent_variables_and_change_of_variables}{Jacobi transform} we obtain PDF of $\epsilon_l$ as:
-$$
-    f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
-$$
-For small values of $N_l$ we compute $\D \epsilon_l$ using numerical quadrature. For sufficiently large $N_l$ we approximate $\chi^2$ by normal distribution:
-$$
-    f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
-$$
-
-\begin{figure}
- \includegraphics[width=0.55\textwidth]{bs_var_var_20.pdf}
- \hspace{-0.1\textwidth}
- \includegraphics[width=0.55\textwidth]{bs_var_var_Nl.pdf}
- \caption{Estimate of error of estimators for $V^r$, $V_l^r$. Left figure demonstrate independece on level, right figure independence on $N_l$. Bootstrapping use 300 samples.}
- \label{fig:bs_var_var}
-\end{figure}
-
-\begin{figure}
- \includegraphics[width=0.55\textwidth]{bs_var_var_composition.pdf}
- \caption{BS estimate of the MSE of the variance estimate and its dropdown to individual levels. Realistic sample vector for a target variance $1e-4$.}
- \label{fig:bs_var_var_comp}
-\end{figure}
-
-
-\subsubsection{Uvahy}
-Cilem je ziskat odhad rozptylu MLMC estimatoru, tak aby skutecny rozptyl byl mensi s danou pravdepodobnosti. 
-
-Notes:
-\begin{itemize}
-    \item Variance $W_l$ of the level variance estimator is:
-    \[
-        Var \hat\sigma_l^2 \approx \hat\sigma_l^2 \frac{2}{N_l - 1}
-    \]
-    \dots assuming
-    \[
-    Z_l = \sum_{i=1}^{n_l}\Big(\frac{\Delta X^l_i}{\sigma_l}\Big)^2
-    \]
-    be approximately $\chi^2_k$ with $k=n_l$. This corresponds to the assumption that level differences $\Delta X_l$ have normal distribution. 
-    \item At least for flow test case it seems that higher moments have smaller $W_l$ then first few (up to 10) moments. The differences in $W_l$ for individual moments are about one order of magnitude.  This effect is more pronounced for levels with many samples so it seems to be real. Differences between levels are also about one order of magnitude.
-    \item These observations are not in contradiction with approximation of variance of  $\log W_l$.
-\end{itemize}
-
+\jb{important, promissing and interesting, however postponed as very preliminary}
+% \label{sec:VarEst}
+% As the exact values for $V_l$ and $C_l$ in \eqref{eq:opt_n_for_var} and \eqref{eq:opt_n_for_cost} are not available they are estimated from initial fraction of the samples. In particular $V_l$ is estimated by standard unbiased variance estimater $\widehat V_l$ and $C_l$ by a mean of times of collected samples 
+% $\widehat C_l$. Error of these estimates can be quite large especially on higher levels. 
+% 
+% 
+% 
+% In order to make MLMC algorithm fully automatic, we have to estimate level variances $V_l$ from already collected samples. Since direct estimates are too inaccurate for higher levels we rather set up a regression model for $V_l$ and estimate its parameters using data from all levels. Moreover, we also combine data for different moments.
+% 
+% 
+% Using the approximation:
+% \[
+%  \log \widehat V_l = \log V_l + \epsilon + O(\epsilon^2), \quad \epsilon = \frac{\widehat V_l - V_l}{V_l}
+% \]
+% we obtain an approximation for its variance as:
+% \[
+%    \Var(\log \widehat V_l) = \Var\left[ \frac{\sum_{i=1}^{N_l} Y_i^2}{N_l -1}\right]  \approx \frac{1}{N-1}
+% \]
+% for some standardized i.i.d. samples $Y_i$.
+% 
+% Under the assumption, that regression model $lm(\vc \alpha)$ fits well we have 
+% \[
+%  1 = (N-1) \Var[log \widehat V] = \E[ (\log \widehat V - lm(\alpha))^2 (N-1) ] 
+% \]
+% 
+% 
+% \[
+%   W_l = \sqrt{N_l-1}*(\log \widehat V_l - lm(\widehat{\vc\alpha}))
+% \]  
+%   is approximately $N(0,1)$. We use test for variance and possibly 
+% reduce the number of levels used for regression. If
+% \[
+%   \sum_l W_l^2 > \chi^2_{N-1}(1-\alpha). 
+% \]
+% we reject hypothesis of the good fit.
+% \todo{Move variance approximation to notes since we need more testing}
+% Remarks:
+% \begin{itemize}
+%  \item Empirically, for the Flow problem, 9 level, for quadratic model and using levels 3,4,5,6,7,8 for the fit we obtain variances that are significantly better then raw variances.
+%  \item The hypothesis testing doesn't work. Even if it holds that $W_l$ is approximately $N(0,1)$.
+%  We obtain much higher values for the statistics. Further it depends on number of moments and number of used levels. 
+%  \item It behaves like it have much greater variance then 1, since $W_l^2$ values corresponds always to the p-values close to 1, which corresponds to big error of the fit.
+%  \item Questionable how it may work for smaller number of levels.
+%  \item Must also be tested for different simulations.
+% \end{itemize}
+% 
+% 
+% 
+% 
+% Let us assume that the level difference $Z_l^r = X_l^r - X^r_{l-l}$ for level $l=1,\dots L$ and a moment $r$ is normally distributed 
+% with mean estimate $\hat{Z}_l^r$ and variance estimate $V_l^r$ is
+% $$
+% W_l^r = \sum_{i} (Z^r_{l,i} - \hat{Z}_l^r)^2 / (n_l - 1).
+% $$
+% 
+% Where $Y_l = (n_l -1)W_l^r/V_l^r$ have distribution $\chi^2_{n_l -1}$.
+% 
+% We assume a simple model:
+% $$
+%   U_l^r = \log W_l^r =  \alpha_r + \beta \log h_l + \gamma (\log h_l)^2.
+% $$
+% where $h_l$ is a mesh step on level $l$ and $\alpha_r$, $\beta$ are parameters. 
+% For the variance of $U_l^r$ we have:
+% $$
+%   \D U_l^r = \D \log \Big( \frac{Y_l V_l^r}{n_l - 1} \Big) = \D \log (Y_l/N_l) = \epsilon_l
+% $$
+% with $N_l = n_l - 1$.
+% 
+% Then we estimate model parameters $\alpha_r$, $\beta$ from the least squares problem:
+% $$
+%     \tn{X}^T \tn{D}^2 \tn{X} \vc{b} = \tn{X}^T \tn{D} \vc{U},
+%     \ D_{i,i} = 1/\epsilon_{l}.
+% $$
+% 
+% Values of $\epsilon_l$ as a function of $l$ will be determined by MC. Note also that using the 
+% \href{https://www.researchgate.net/post/How_can_I_obtain_the_PDF_of_the_logarithm_of_a_chi-squared_random_variable}{transformation} we obtain PDF of $\epsilon_l$ as:
+% 
+% $$
+%     f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
+% $$
+% For small values of $N_l$ we compute $\D \epsilon_l$ using numerical quadrature. For sufficiently large $N_l$ we approximate $\chi^2$ by normal distribution:
+% $$
+%     f(\epsilon) = \exp(\epsilon)N_l\chi^2_{n-1}(\exp(\epsilon)N_l).
+% $$
+% 
+% \begin{figure}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_20.pdf}
+%  \hspace{-0.1\textwidth}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_Nl.pdf}
+%  \caption{Estimate of error of estimators for $V^r$, $V_l^r$. Left figure demonstrate independece on level, right figure independence on $N_l$. Bootstrapping use 300 samples.}
+%  \label{fig:bs_var_var}
+% \end{figure}
+% 
+% \begin{figure}
+%  \includegraphics[width=0.55\textwidth]{bs_var_var_composition.pdf}
+%  \caption{BS estimate of the MSE of the variance estimate and its dropdown to individual levels. Realistic sample vector for a target variance $1e-4$.}
+%  \label{fig:bs_var_var_comp}
+% \end{figure}
+% 
+% 
+% \subsubsection{Uvahy}
+% Cilem je ziskat odhad rozptylu MLMC estimatoru, tak aby skutecny rozptyl byl mensi s danou pravdepodobnosti. 
+% 
+% Notes:
+% \begin{itemize}
+%     \item Variance $W_l$ of the level variance estimator is:
+%     \[
+%         Var \hat\sigma_l^2 \approx \hat\sigma_l^2 \frac{2}{N_l - 1}
+%     \]
+%     \dots assuming
+%     \[
+%     Z_l = \sum_{i=1}^{n_l}\Big(\frac{\Delta X^l_i}{\sigma_l}\Big)^2
+%     \]
+%     be approximately $\chi^2_k$ with $k=n_l$. This corresponds to the assumption that level differences $\Delta X_l$ have normal distribution. 
+%     \item At least for flow test case it seems that higher moments have smaller $W_l$ then first few (up to 10) moments. The differences in $W_l$ for individual moments are about one order of magnitude.  This effect is more pronounced for levels with many samples so it seems to be real. Differences between levels are also about one order of magnitude.
+%     \item These observations are not in contradiction with approximation of variance of  $\log W_l$.
+% \end{itemize}
+% 
 
 \section{Maximal Entropy method}\label{mem}
 
-The MLMC estimator \eqref{eq:mlmc_est} can be applied to estimate any generalized moment $\E[\phi(X)]$ 
-of the random variable $X$ using the same set of random samples. Taking a suitable 
-set of such moments it is possible to construct an approximation to the PDF of $X$. This section first
-summarizes the Maximal Entropy method and related theoretical results slightly simplifying proofs from \cite{Barron1991}. Later we provide a natural selection of the polynomial basis based on the estimate of the covariance matrix. We show that this choice significantly improves the convergence of the related optimization problem.
+The MLMC estimator \eqref{eq:mlmc_est} can estimate a generalized moment $\E[\phi(X)]$ 
+for any function $\phi$ for which the expectation is finite, i.e. 
+$\phi \in L^1(\rho_X)$.
+The same set of random samples can be used for estimation of moments for various functions $\phi$. Then we can find a probability density function with the same moments.
+As this inverse problem is under-determined, the PDF with maximal Shanon's entropy is selected. This Maximal Entropy method (see \cite{}) is summarized in Section 
+\ref{}. Reconstructed probability density is subjected to the approxiamtion error 
+of the moment function space and to the estimation error of the moment values. Both were first estimated by \cite{Barron1991} and recently applied to MLMC by \cite{Chernov}. 
+However these estimates are practical only for strictly positive densities. 
+
+This section first summarizes the Maximal Entropy method and provides error estimates  practical slightly simplifying proofs from . Later we provide a natural selection of the polynomial basis based on the estimate of the covariance matrix. We show that this choice significantly improves the convergence of the related optimization problem.
 
 Let $X$ be a continuous random variable with density function $\rho$ that have bounded support
 $supp(\rho) \subset \Omega$ for a finite interval $\Omega \subset \R$. Further consider generalized moments
@@ -470,6 +476,7 @@ Due to \eqref{eq:moment_system} it holds $\E_{\rho}[\vphi] = \E_{\rho_{\vl}}[\vp
 The first term on the right side of \eqref{eq:decomposition} corresponds to the approximation error of the family $\mathcal F_p$ while the second term with $\estvl = \estvl(\estvmu)$ represents the error due to the moment estimation. 
 
 \subsection{Approximation error}
+\jb{toto je jen prepis Barrona, bud jen ocitovat, nebo odvodit lepsi odhad. Je totiz pravda, ze ten odhad je velmi suboptimalni. Ve skutecnosti plati i pro hustoty ktere jsou nekde nulove a asi i pro vhodny rust od nuly.}
 Following estimates are based on \cite[Lemma 2]{Barron1991} 
 \begin{lemma} 
   \begin{equation}
@@ -482,7 +489,7 @@ Following estimates are based on \cite[Lemma 2]{Barron1991}
       \label{eq:l1_estimate}
       D(p\Vert q) \le \frac{1}{2}\norm{\log p/ q}^2_{L^2_p} + \norm{\log p/ q}_{L^1_p}
   \end{equation}
- for any constant $c$.
+ for any constant $c$. \jb{Jak se dostane druha nerovnost? Asi ne z \cite[Lemma 2]{Barron1991}}.
 \end{lemma}
 
 Then for the approximation error, we have:
@@ -522,14 +529,13 @@ Applying \eqref{eq:l2_estimate} with $c = \log p - \psi$, we obtain:
   \le \frac{\abs{\Omega}}{2} e^{\epsilon} \epsilon^2.
 \]
 \end{proof}
-For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can directly apply results form \cite[Section 7]{Barron1991}. For a $\rho \in W^r_2(\Omega)$:
+For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can directly apply results form \cite[Section 7]{Barron1991}. For a $\log\rho \in W^r_2(\Omega)$:
 \[
-    \epsilon_{m,\infty}(\rho) \le C \left(\frac{1}{m}\right)^{r-1} \norm{\rho}_{W^r_2},
+    \epsilon_{m,\infty}(\rho) \le C \left(\frac{1}{m}\right)^{r-1} \norm{\log\rho}_{W^r_2},
 \]
 \[
-    \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\rho}_{W^r_2}.
+    \epsilon_{m,2}(\rho) \le C \left(\frac{1}{m}\right)^{r}\norm{\log\rho}_{W^r_2}.
 \]
-
 
 \begin{figure}[!htb]
 \begin{center} 
@@ -540,7 +546,6 @@ For the case of polynomial approximation $\mathcal V_M = P^M(\Omega)$ we can dir
 \end{figure} 
 \FloatBarrier
 The figure \ref{fig:convergence} describes the convergence of numerical minimization. Distributions are configured as described in section \ref{benchmarks_distr}. The number of 85 exact moments is utilized. Given our preconditioning (cutting eigenvalues below or equal to zero), the truncation of moments occur in cases of five-fingers ($M=81$) and zero-value ($M=57$) distributions.
-
 \begin{figure}[!htb]
 \begin{center} 
 \includegraphics[width=0.75\textwidth]{mu_err_iterations_no_precond.pdf}
@@ -550,26 +555,18 @@ The figure \ref{fig:convergence} describes the convergence of numerical minimiza
 \end{figure} 
 \FloatBarrier
 \todo{Preconditioning seems to even get worse convergence!?}
-
 \subsection{Benchmark distributions}\label{benchmark_distr}
-
 Following representative distributions are chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
-
 % Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
-
-Two-Gaussians \ref{fig:two-gaussians} is composition of two normal distributions \newline ${\rho(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5)}$, $x \in (-\infty, \infty)$. In this case it is unable to employ just one exponential to capture exact shape of the small peak on the side of the higher one.
-To further challenge our approach we implement a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
-$\rho(x) = \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)}$, $x \in [0, 1]$. 
-The Cauchy distribution $\rho(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in [-20, 20]$ which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
-Due to the further application we also investigate MEM ability to capture lognormal distribution with PDF $\rho(x) = \mathcal{LN}(x|\mu=4.5, \sigma=5.9) \text{, } x \in (0, \infty)$.
+Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
+\begin{equation}
+    f(x)=
+    \begin{cases}
+      4/5, & x < 0.3 \text{ or } x > 0.8 \\
 
 The Abyss distribution \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture this distribution by polynomials that have wide support. 
 \begin{equation*}
     \rho(x)=
-    \begin{cases}
-      0.1, & -0.1 \geq x \leq 0.1 \\   
-      \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
-    \end{cases}
 \end{equation*}
 The last distribution that is called zero-value is considered on the interval $x \in [-1, 1]$ with the following PDF
 \begin{equation*}
@@ -605,7 +602,6 @@ Distributions that do not have an explicitly defined interval on which they are 
 %   \caption{log-normal}
 %   \label{fig:discontinuous}
 % \end{subfigure}\hfil % <-- added
-
 % \begin{subfigure}{0.5\textwidth}
 %   \includegraphics[width=\linewidth]{benchmark_distributions/approx_error/abyss_exact.pdf}
 %   \caption{abyss}
@@ -620,49 +616,27 @@ Distributions that do not have an explicitly defined interval on which they are 
 % \label{fig:approx_error}
 % \end{figure}
 % \FloatBarrier
-
-
-
-\begin{figure}[htb]
-    \centering % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
-  \caption{two-gaussians}
-  \label{fig:two-gaussians}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
-  \caption{five-fingers}
-  \label{fig:five-fingers}
 \end{subfigure}\hfil
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
-  \caption{Cauchy}
-  \label{fig:cauchy}
 \end{subfigure} % <-- added
 \medskip
-\begin{subfigure}{0.333\textwidth}
   \includegraphics[width=\linewidth]{benchmark_distributions/lognorm.pdf}
   \caption{lognormal}
   \label{fig:lognormal}
-\end{subfigure}\hfil % <-- added
-\begin{subfigure}{0.333\textwidth}
-  \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
-  \caption{abyss}
-  \label{fig:abyss}
 \end{subfigure}\hfil
 \begin{subfigure}{0.333\textwidth}
   \includegraphics[width=\linewidth]{benchmark_distributions/zero_value.pdf}
   \caption{zero-value}
   \label{fig:rho4}
 \end{subfigure}\hfil % <-- added
-\caption{Benchmark distributions}
-\label{fig:images}
-\end{figure}
-\FloatBarrier
 
 
 \subsection{Estimation error}
+\jb{JB TODO:
+
+- finish contra-examples
+- tests for zero valued PDFs
+- modify test plots
+- present only result for the mean Hassian matrix}
 We start with a sensitivity estimate for the nonlinear system \eqref{eq:moment_system}.
 
 \begin{lemma}
@@ -680,6 +654,7 @@ where $\alpha_0$ is the smallest eigenvalue of the Hessian matrix $\tn H(\estvl)
 Unfortunately we are yet unable to proof this result. So we try some numerical tests.
 
 Based on numerical experiments, we try to show that the relation \ref{eq:lambda_mu} holds true for all our benchmark distributions. All distributions are restricted on the interval $[Q_{0.01}, Q_{0.99}] $, $M=25$ is utilized.
+\jb{What is purpose of depicting TV of the difference?}
  The results are depicted in the picture \ref{fig:lambda_kl_tv}. In graphic terms, the formula \ref{eq:lambda_mu} is valid if all red dots with coordinates ($|\vmu - \estvmu|, \alpha_{0}|\vl - \estvl|$) are on or below the black line. The line represents the axis of the first quadrant. 
 
 
@@ -698,7 +673,7 @@ However it seems that the lambda bound holds even without renormalization.
 
 
 
-In addition to verifying the validity of the formula \ref{eq:lambda_mu}, we also tried to show the KL divergence and its relation to the total variation \note{It is total variation of two  distributions, it is not total variation of single distribution - roughness of distribution} and has the following general form:
+In addition to verifying the validity of the formula \ref{eq:lambda_mu}, we also tried to show the KL divergence and its relation to the total variation \ms{It is total variation of two  distributions, it is not total variation of single distribution - roughness of distribution} and has the following general form:
 $$
 TV(p\Vert q) = \frac{1}{2}\Vert p(x) - q(x)\Vert_1.
 $$ 
@@ -708,7 +683,7 @@ Pinker's inequality bounds total variation from above in terms of the KL diverge
 D(\rho_{\vl}\Vert\estrho) \geq (2\log e) {TV}^2(\rho_{\vl}\Vert\estrho).
 \end{equation}
 
-\note{KL divergence $D(\rho_{\vl}\Vert\estrho)$ was calculated as $D(\rho_{\vl}\Vert\estrho) = (\vl - \hat{\vl})\vmu$}
+\ms{KL divergence $D(\rho_{\vl}\Vert\estrho)$ was calculated as $D(\rho_{\vl}\Vert\estrho) = (\vl - \hat{\vl})\vmu$}
 
 To depict this relation we added
 the blue dots with coordinates: $(|\vmu - \estvmu|, \sqrt{\frac{D(\rho_{\vl}\Vert\estrho)}{C_M}})$
@@ -759,7 +734,40 @@ where $\alpha_0((\vl + \estvl)/2)$ is the smallest eigen value of the Hass matri
 $\tn H((\vl + \estvl)/2)$. This is not so good as we only know $\estvl$. 
 
  
- 
+  
+Other possible way:
+\[
+   \int_\Omega \rho_{\vl} = \int_{\Omega} p e^a = 1
+\]
+
+\[
+ \int_\Omega \rho_{\estvl} = \int_{\Omega} p e^b  = \int_{\Omega} p e^a e^{b-a}  = 1
+\]
+
+\[
+   \int_\Omega p e^a \Big(1 - e^{b-a}\Big) = \int_{\Omega} p e^a = 0
+\]
+Now we multiply by yet unspecified factor $r$ and add to the estimate:
+
+\[
+  (\vl - \estvl)\cdot(\vmu - \estvmu) 
+      = \int_{\Omega} p (a - b) e^a\Big(1 - e^{b-a}\Big) =
+      = \int_{\Omega} p e^a\Big(1 - e^{b-a}\Big)\Big(a - b + r\Big)
+\]
+Assume $a-b = (\vl-\estvl) \cdot \phi(x) \le M$, which is a corrolary of the estimates
+derived by \cite{Barron1991}. Alternatively we can possibly prove it from normalization equations for both $\vl$ and $\estvl$. With this assimption we have:
+\[
+ \Big(1 - e^{b-a}\Big)\Big(a - b + r\Big) \ge (a-b)^2
+\]
+setting $r 2= M^2$. Indeed, denoting $x=a-b$:
+\[
+  (1 - e^{-x})x \ge x^2\quad\text{ for } x<0
+\]
+and 
+\[
+  (1 - e^{-x})x \ge \frac12 x^2\quad\text{ for } x<0
+\]
+
  
 
 
@@ -964,7 +972,7 @@ Similarly as in \cite[Theorem 3]{Barron1991} we
 Cite estimates for $D(\rho\Vert\rho_{\lambda})$.
 
 Modify estimates for $D(\rho\Vert\rho_{\lambda})$ using $q=p$ and
-approximation of $Cov_p \vc phi$ for Legendere polynoms $\vc\phi$.
+approximation of $Cov_p \vcphi$ for Legendere polynoms $\vc\phi$.
 
 Probabilistic result $D(\rho_{\lambda*} \Vert \rho_{\lambda}) < V/p$
 with probability at least $1-p$, where 
@@ -1142,7 +1150,196 @@ rapidly we can use truncated sum, i.e. truncated KL expansion.
 
 The spectral methods sample the field by its Fourier Second kind of methods use sp
 
+
+% \section{Numerical experiments}
+% 
+% \subsection{MLMC sampling algorithm}
+% Optimal choice of the sample vector $\vc N$ given by \eqref{eq:opt_n_for_var} or \eqref{eq:opt_n_for_cost} is function $N^{opt}(\vc V, \vc C)$ of the vector of level variances $\vc V$ and the vector of level costs $\vc C$. As $\vc V$ and $\vc C$ are not known a priori, we want to estimate them on the fly from the increasing set of collected samples. as we collect the samples.  Level variances $V_l$ are estimated by the regression \eqref{eq:regression}, sample cost $C_l$ is simply the average sample time of collected samples on the level $l$. 
+% In order to collect optimal number of samples we designed a simple iterative Algorithm \ref{algo_sampling}. 
+% Initial vector of scheduled samples $N^s_0$ is fixed, in particular we use an arithmetic sequence decreasing form $100$ to $0$. Vector $\vc N^t_0$ of target number of samples is set to $2\,\vc N^s_0$. The iteration $i$ starts with scheduling new samples up to the $\vc N^s_i$.
+% Then we wait until at least half of $N^s_i$ is computed. \todo{"half of samples is done" ... to je divne, neni jasne pulka kterych by to mela byt, a jestli to musi byt pulka.}. We collect computed samples and use all available samples to update estimates $\vc V_i$ and $\vc C_i$ for level variances and costs respectively.
+% Using these new estimates we determine new target sampling vector $\vc N^t_{i+1}$ and
+% add fraction $\alpha$ of the difference to $\vc N^t_{i}$. We iterate until relative difference between target and scheduled sampling vectors is greater then tolerance $\epsilon$ for any level $l$.
+% In practice we use parameters $\alpha=0.1$ and $\epsilon = 0.0$
+% 
+% \begin{algorithm}
+%     \SetAlgoLined
+%     \DontPrintSemicolon
+%     
+%     $\vc N^s_0 \gets ( 100, ..., 3)$\;
+%     $\vc N^t_0 = 2 \vc N^s_0$\;
+%     $i \gets 0$\;
+%     \While{ $N^t_{i,l} - N^s_{i,l} > \eps N^s_{i,l}$ for any $l$ }{
+%         schedule new samples up to $\vc N^s_i$\;
+%         wait until half of samples is done\;
+%         estimate $\vc V_i$, $\vc C_i$ from collected samples\;
+%         $\vc N^t_{i+1} \gets N^{opt}(\vc V_i, \vc C_i)$\;
+%         $\vc N^s_{i+1} \gets \vc N^s_i + \alpha(\vc N^t_{i+1} - \vc N^s_i)$\;
+%         $i \gets i+1$\;
+%     }
+%     \label{algo_sampling}
+%     \caption{MLMC samples number estimation}
+% \end{algorithm}
+% 
+% Progress of the algorithm is depicted at Figure \ref{fig:n_l_time}.  ... 
+% 
+% \break
+% Following graph \ref{fig:n_l_time} and table \ref{mlmc_sampling} provide data for the task of water flowing through unit square using flow123d \cite{flow123d} software. We use five level MC method. Different meshes were created at different levels. First level mesh had just 6 elements, higher levels had meshes with 78, 1730, 40818 and 997606 elements. Whole task was performed on cluster that contains 20 nodes each of them has 2x 10-core CPU and 96 GB RAM, this allowed us to perform parallel computing of samples. Individual sample computations were grouped to the jobs that were scheduled in cluster by PBS software. Each job had approximately same computational cost. Cluster traffic affects the number of currently running jobs. As a result, it can affect the fluency of the sample computations. That probably caused jump $C^c$ around 40th iteration in \ref{fig:n_l_time}.
+% 
+% \todo{Popsat jake byly velikosti siti na jednotlivych urovnich a jaka to vubec byla uloha. Popsat zhruba HW na kterem to bezelo, a davkove zpracovani pomoci PBS. Okomentovat nerovnomerny prubeh krivky dokoncenych vzorku.}
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=\textwidth]{time_1.png}
+% \caption{Evolution of CPU time for target $C^t$, scheduled $C^s$ and collected samples during iterations of Algorithm \ref{algo_sampling}.}
+% \label{fig:n_l_time}
+% \end{figure}
+% \todo{Upravit typ car: barvou rozlisit $C^s$, $C^t$, $C^c$, plnou carou kompletni cas, carkovane pouze vypocet Flow123d. Tu carkovanou bych udelal jen pro $N_c$. Takze by tam nakonec byly 4 cary.}
+% V tomto grafu jsou $C^s$ - naplánované vzorky (estimated), $C^c$ jsou již dokončené vzorky (collected), $C^t$ jsou cílové vzorky pokud bychom je určovali z $C^c$. Po skončení celé MLMC by byly $C^c$ a $C^s$ stejné, $C^t$ jsou na konci menší než $C^s$, protože se ukazuje, že jsme na začátku napočítali více vzorků na nižších úrovních [17, 7, 3] a stačilo by [12, 2, 2]. Různý typ čar jsem zvolil kvůli tomu kdyby to nakonec bylo černobíle, tak aby to bylo k přečtení. Pokud by tam zůstali ty přidané křivky, tak už by to nešlo oddělit stylem čáry. 
+% \todo{Proc je graf nakonci uriznuty? Mozna tu tabulku uplne zrusime, ale do grafu by se tedy jeste hodil odhadovany cas naplanovanych uloh. To je asi ten cas estimated v tabulce.  Bylo by z toho snad videt, ze mame celou dobu previs naplanovanych uloh na provedenymi.}
+% 
+% \begin{table}[]
+% \caption{Sampling algorithm iterations}
+% \centering
+% 
+% \begin{tabular}{|l|l|l|l|l|l|l|}
+% \hline
+% iteration                                  & samples  & $l_{1}$     & $l_{2}$   & $l_{3}$  & $l_{4}$ & $l_{5}$ \\ \hhline{|=|=|=|=|=|=|=|}
+% {\multirow{2}{*}{0}} & collected & 100    & 41    & 17  & 7  & 2  \\ 
+%                    & estimated & 2204   & 402   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{1}                       & collected & 1112   & 402   & 17  & 7  & 3  \\  
+%                                          & estimated & 3955   & 612   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{2}                       & collected & 2103   & 432   & 17  & 7  & 3  \\  
+%                                          & estimated & 5545   & 801   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{3}                       & collected & 2789   & 481   & 17  & 7  & 3  \\  
+%                                          & estimated & 6982   & 971   & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{4}                       & collected & 3777   & 654   & 17  & 7  & 3  \\  
+%                                          & estimated & 8261   & 1118  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{5}                       & collected & 4455   & 785   & 17  & 7  & 3  \\ 
+%                                          & estimated & 9435   & 1253  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{10}                      & collected & 6517   & 926   & 17  & 7  & 3  \\  
+%                                          & estimated & 12979  & 1642  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{15}                      & collected & 8668   & 1216  & 17  & 7  & 3  \\  
+%                                          & estimated & 15646  & 1920  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{20}                      & collected & 9457   & 1268  & 17  & 7  & 3  \\  
+%                                          & estimated & 17181  & 2078  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{25}                      & collected & 9950   & 1287  & 17  & 7  & 3  \\ 
+%                                          & estimated & 18081  & 2172  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{30}                      & collected & 9972   & 1293  & 17  & 7  & 3  \\  
+%                                          & estimated & 18671  & 2247  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{35}                      & collected & 10488  & 1322  & 17  & 7  & 3  \\ \ 
+%                                          & estimated & 19021  & 2292  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{40}                      & collected & 16739  & 2102  & 17  & 7  & 3  \\  
+%                                          & estimated & 19233  & 2317  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{45}                      & collected & 16656  & 2065  & 17  & 7  & 3  \\  
+%                                          & estimated & 19368  & 2334  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{50}                      & collected & 16647  & 2055  & 17  & 7  & 3  \\  
+%                                          & estimated & 19473  & 2355  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{54}                      & collected & 16747  & 2050  & 17  & 7  & 3  \\  
+%                                          & estimated & 19504  & 2361  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{55}                      & collected & 16782  & 2051  & 17  & 7  & 3  \\  
+%                                          & estimated & 19544  & 2370  & 17  & 7  & 3  \\ \hline
+% \multirow{2}{*}{56}                      & collected & 16783  & 2051  & 17  & 7 & 3  \\  
+%                                          & estimated & 19556  & 2373  & 17  & 7 & 3  \\ \hline
+% \end{tabular}
+% \end{table}
+% \FloatBarrier
+% 
+% 
+
+
+
+
+
+
+
+
 \section{Numerical experiments}
+\jb{TODO: present to kind of tests: \\
+
+MEM benchmarks for artificial distributions, without MLMC but dealing with noise in moments, validation of theory
+
+Homogenization of flow through square, MLMC + MEM, focus on level variances of a real problem of interest and performance of MLMC MEM as whole}
+
+\subsection{Benchmark distributions}
+
+Following representative distributions were chosen to verify our assumptions. The majority of them is selected based on the article by J. Farmer and D. Jacobs \cite{Farmer2018511}.
+
+Normal distribution $f(x) = \mathcal{N}(x|\mu=0, \sigma=10) \text{, } x \in (-\infty, \infty)$ is the basic example and has propitious features. In terms of MEM, it is possible to approximate its shape \ref{fig:normal} with one exponential. 
+
+Two-Gaussians \ref{fig:two-gaussians} is a slightly more complex distribution. It is composed of two normal distributions $ f(x) = \frac{7}{10} \mathcal{N}(x|\mu_{1}=5, \sigma_{1}=3) + \frac{3}{10}\mathcal{N}(x|\mu_{2}=0, \sigma_{2}=0.5) \text{, } x \in (-\infty, \infty) \text{.}$ In this case it is unable to employ just one exponential. There is difficulty in capturing exact shape through a small peak on the side of the higher one.
+
+
+To further challenge our approach we implemented a composition of very steep and close normal distributions called five-fingers distribution \ref{fig:five-fingers}
+
+$ f(x) = w \sum_{k=1}^{5}{\mathcal{N}\bigg(x\bigg|\mu_{k}=\frac{2k-1}{10}, \sigma_{k} = \frac{1}{100}\bigg)} + (1-w) \text{.}$ 
+
+
+The Cauchy distribution $f(x) = \frac{1}{\pi(x^2 + 1)} \text{, } x \in (-\infty, \infty)$, which has a heavy tail \ref{fig:cauchy} and a non existing standard deviation is truncated to ensure stability of MEM and existence of solution.
+
+The last distributions \ref{fig:discontinuous} and \ref{fig:abyss} incorporate points of discontinuity. It is not possible to fully capture these distributions by polynomials which have wide support. 
+
+Discontinuous distribution is defined for $x \in [0, 1]$ as follows:
+\begin{equation}
+    f(x)=
+    \begin{cases}
+      4/5, & x < 0.3 \text{ or } x > 0.8 \\
+      1, & 0.4 < x < 0.5 \\
+      5/4, & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+Abyss is based on normal distribution
+  \begin{equation}
+    f(x)=
+    \begin{cases}
+      0.1, & -0.1 \geq x \leq 0.1 \\   
+      \mathcal{N}(x|\mu=0, \sigma=1), & \text{elsewhere.}
+    \end{cases}
+ \end{equation}
+  
+
+
+
+
+\begin{figure}[htb]
+    \centering % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/norm.pdf}
+  \caption{normal}
+  \label{fig:normal}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/two_gaussians.pdf}
+  \caption{two-gaussians}
+  \label{fig:two-gaussians}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/five_fingers.pdf}
+  \caption{five-fingers}
+  \label{fig:five-fingers}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/cauchy.pdf}
+  \caption{Cauchy}
+  \label{fig:cauchy}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/discontinuous.pdf}
+  \caption{discontinuous}
+  \label{fig:discontinuous}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.333\textwidth}
+  \includegraphics[width=\linewidth]{benchmark_distributions/abyss.pdf}
+  \caption{abyss}
+  \label{fig:abyss}
+\end{subfigure}
+\caption{Benchmark distributions}
+\label{fig:images}
+\end{figure}
+\FloatBarrier
+
 % \begin{figure}
 %     \centering
 %     \includegraphics[width=\textwidth]{01_cond_pdf_cdf.pdf}
